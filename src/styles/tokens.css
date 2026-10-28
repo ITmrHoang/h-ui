@@ -17,10 +17,10 @@
 :where(:root),
 :where([data-theme="light"]) {
   /* === Bảng màu chính === */
-  /* Indigo-600: chữ trắng trên nền primary và chữ primary trên nền trắng đều đạt WCAG AA (≈6,3:1) */
-  --hui-primary: #4f46e5;
+  /* Xanh ngọc (jade) đậm: chữ trắng trên nút primary ≈6,6:1, chữ primary trên nền ngọc nhạt ≥5,3:1 */
+  --hui-primary: #08695f;
 
-  --hui-secondary: #64748b;
+  --hui-secondary: #3f6662;
 
   --hui-success: #10b981;
 
@@ -31,34 +31,36 @@
   --hui-info: #3b82f6;
 
   /* === Màu nền & text === */
-  --hui-bg: #ffffff;
-  --hui-bg-secondary: #f8fafc;
-  --hui-bg-tertiary: #f1f5f9;
+  /* Nền trang pastel ngọc sáng; khối nội dung (card, input, popup) trắng để nổi lên trên nền */
+  --hui-bg: #f2fbf8;
+  --hui-bg-secondary: #e4f6f0;
+  --hui-bg-tertiary: #d4efe6;
   --hui-surface: #ffffff;
-  --hui-overlay: rgba(0, 0, 0, 0.5);
+  --hui-overlay: rgba(4, 30, 27, 0.5);
 
-  --hui-text: #0f172a;
-  --hui-text-secondary: #475569;
-  --hui-text-muted: #617188; /* ≥4,5:1 trên --hui-bg / -secondary / -tertiary và nền input filled (placeholder, chú thích) */
+  /* Chữ ngả ngọc rất đậm thay vì xám: chính ≈15:1, phụ ≈9:1, mờ ≥5,5:1 trên mọi nền sáng */
+  --hui-text: #062421;
+  --hui-text-secondary: #1f4743;
+  --hui-text-muted: #3d625d;
   --hui-text-inverse: #ffffff;
   --hui-text-light-solid: #ffffff; /* Chữ trắng ở MỌI theme — dùng trên nền tối cố định (tooltip, mask) */
 
   /* === Border === */
-  --hui-border: #e2e8f0;
-  --hui-border-hover: #cbd5e1;
+  --hui-border: #bfe5da;
+  --hui-border-hover: #8fd1c2;
   --hui-border-focus: var(--hui-primary);
 
 
   /* === Token ngữ nghĩa (Ant: colorBgContainer / colorBgElevated / colorFill...) === */
   --hui-bg-container: var(--hui-surface);   /* Nền khối nội dung: card, input, table */
   --hui-bg-elevated: #ffffff;               /* Nền lớp nổi: dropdown, popover, modal */
-  --hui-bg-spotlight: rgba(15, 23, 42, 0.88); /* Nền tooltip */
+  --hui-bg-spotlight: rgba(6, 36, 33, 0.92); /* Nền tooltip */
   --hui-text-tertiary: var(--hui-text-muted);
-  --hui-text-disabled: rgba(15, 23, 42, 0.25);
-  --hui-border-secondary: #f1f5f9;          /* Viền mảnh: đường kẻ bảng, divider trong card */
-  --hui-fill: rgba(15, 23, 42, 0.15);       /* Nền thao tác đậm (thanh slider) */
-  --hui-fill-secondary: rgba(15, 23, 42, 0.06); /* Nền hover của item menu/list */
-  --hui-fill-tertiary: rgba(15, 23, 42, 0.04);  /* Nền nhẹ: input filled, thẻ tag mặc định */
+  --hui-text-disabled: rgba(6, 36, 33, 0.32);
+  --hui-border-secondary: #dcf2eb;          /* Viền mảnh: đường kẻ bảng, divider trong card */
+  --hui-fill: rgba(8, 105, 95, 0.18);       /* Nền thao tác đậm (thanh slider) */
+  --hui-fill-secondary: rgba(8, 105, 95, 0.08); /* Nền hover của item menu/list */
+  --hui-fill-tertiary: rgba(8, 105, 95, 0.05);  /* Nền nhẹ: input filled, thẻ tag mặc định */
   /* Màu pha để tạo sắc độ đậm 7–10: theme sáng pha đen, theme tối pha trắng */
   --hui-shade-mix: #000000;
   color-scheme: light;
@@ -103,11 +105,12 @@
   --hui-font-weight-bold: 700;
 
   /* === Shadow === */
-  --hui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --hui-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --hui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --hui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --hui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  /* Bóng ngả ngọc (không xám) để khối trắng nổi trên nền pastel */
+  --hui-shadow-sm: 0 1px 2px rgba(6, 60, 54, 0.08);
+  --hui-shadow: 0 1px 3px rgba(6, 60, 54, 0.12), 0 1px 2px rgba(6, 60, 54, 0.08);
+  --hui-shadow-md: 0 4px 6px -1px rgba(6, 60, 54, 0.12), 0 2px 4px -2px rgba(6, 60, 54, 0.1);
+  --hui-shadow-lg: 0 10px 15px -3px rgba(6, 60, 54, 0.14), 0 4px 6px -4px rgba(6, 60, 54, 0.1);
+  --hui-shadow-xl: 0 20px 25px -5px rgba(6, 60, 54, 0.16), 0 8px 10px -6px rgba(6, 60, 54, 0.1);
 
   /* === Transition === */
   --hui-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -157,107 +160,107 @@
    ============================================ */
 
 :where([data-theme="dark"]) {
-  /* === Bảng màu chính (sáng hơn để đủ tương phản trên nền tối; primary = indigo-300 để chữ primary
-     trên nền chọn --hui-primary-light của lớp nổi vẫn đạt AA) === */
-  --hui-primary: #a5b4fc;
+  /* === Nền xanh than ngả tím (có chiều sâu: nền < khối < lớp nổi), chữ trắng; primary tím lavender
+     sáng để chữ tối trên nút ≈9:1 và chữ primary trên nền chọn của lớp nổi ≥5,5:1 === */
+  --hui-primary: #b9a8ff;
 
-  --hui-secondary: #94a3b8;
+  --hui-secondary: #a9ade0;
 
   --hui-success: #34d399;
 
   --hui-warning: #fbbf24;
 
-  --hui-danger: #f87171;
+  --hui-danger: #ff8a8a;
 
   --hui-info: #60a5fa;
 
   /* === Màu nền & text === */
-  --hui-bg: #0f172a;
-  --hui-bg-secondary: #1e293b;
-  --hui-bg-tertiary: #334155;
-  --hui-surface: #1e293b;
-  --hui-overlay: rgba(0, 0, 0, 0.7);
+  --hui-bg: #0d0f26;
+  --hui-bg-secondary: #15183a;
+  --hui-bg-tertiary: #22265a;
+  --hui-surface: #15183a;
+  --hui-overlay: rgba(5, 6, 20, 0.72);
 
-  --hui-text: #f1f5f9;
-  --hui-text-secondary: #cbd5e1;
-  --hui-text-muted: #a0adc0; /* ≥4,5:1 trên mọi nền tối (kể cả --hui-bg-tertiary) */
+  --hui-text: #ffffff;
+  --hui-text-secondary: #e6e7ff;
+  --hui-text-muted: #bcc0ec; /* ≥7,9:1 trên mọi nền tối (kể cả --hui-bg-tertiary) */
   /* Chữ trên nền màu (nút primary, badge...) → tối để tương phản với màu sáng hơn */
-  --hui-text-inverse: #0f172a;
+  --hui-text-inverse: #0d0f26;
 
   /* === Token ngữ nghĩa === */
   --hui-bg-container: var(--hui-surface);
-  --hui-bg-elevated: #273449;
-  --hui-bg-spotlight: rgba(51, 65, 85, 0.95);
+  --hui-bg-elevated: #1d2050;
+  --hui-bg-spotlight: rgba(40, 44, 100, 0.96);
   --hui-text-tertiary: var(--hui-text-muted);
-  --hui-text-disabled: rgba(241, 245, 249, 0.3);
-  --hui-border-secondary: #1e293b;
-  --hui-fill: rgba(241, 245, 249, 0.18);
-  --hui-fill-secondary: rgba(241, 245, 249, 0.1);
-  --hui-fill-tertiary: rgba(241, 245, 249, 0.06);
+  --hui-text-disabled: rgba(230, 231, 255, 0.36);
+  --hui-border-secondary: #1f2350;
+  --hui-fill: rgba(185, 168, 255, 0.22);
+  --hui-fill-secondary: rgba(185, 168, 255, 0.12);
+  --hui-fill-tertiary: rgba(185, 168, 255, 0.07);
   --hui-shade-mix: #ffffff;
   color-scheme: dark; /* Thanh cuộn, ô input native, lịch native cũng chuyển tối */
 
   /* === Border === */
-  --hui-border: #334155;
-  --hui-border-hover: #475569;
+  --hui-border: #30356f;
+  --hui-border-hover: #474e9a;
   /* Khai báo lại để var() lấy --hui-primary của theme tối (var() được tính tại phần tử khai báo) */
   --hui-border-focus: var(--hui-primary);
 
   /* === Shadow (đậm hơn vì nền tối) === */
-  --hui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --hui-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --hui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --hui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-  --hui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --hui-shadow-sm: 0 1px 2px rgba(3, 4, 18, 0.5);
+  --hui-shadow: 0 1px 3px rgba(3, 4, 18, 0.6), 0 1px 2px rgba(3, 4, 18, 0.5);
+  --hui-shadow-md: 0 4px 6px -1px rgba(3, 4, 18, 0.6), 0 2px 4px -2px rgba(3, 4, 18, 0.5);
+  --hui-shadow-lg: 0 10px 15px -3px rgba(3, 4, 18, 0.6), 0 4px 6px -4px rgba(3, 4, 18, 0.5);
+  --hui-shadow-xl: 0 20px 25px -5px rgba(3, 4, 18, 0.6), 0 8px 10px -6px rgba(3, 4, 18, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
   :where(:root:not([data-theme])) {
-    --hui-primary: #a5b4fc;
+    --hui-primary: #b9a8ff;
 
-    --hui-secondary: #94a3b8;
+    --hui-secondary: #a9ade0;
 
     --hui-success: #34d399;
 
     --hui-warning: #fbbf24;
 
-    --hui-danger: #f87171;
+    --hui-danger: #ff8a8a;
 
     --hui-info: #60a5fa;
 
-    --hui-bg: #0f172a;
-    --hui-bg-secondary: #1e293b;
-    --hui-bg-tertiary: #334155;
-    --hui-surface: #1e293b;
-    --hui-overlay: rgba(0, 0, 0, 0.7);
+    --hui-bg: #0d0f26;
+    --hui-bg-secondary: #15183a;
+    --hui-bg-tertiary: #22265a;
+    --hui-surface: #15183a;
+    --hui-overlay: rgba(5, 6, 20, 0.72);
 
-    --hui-text: #f1f5f9;
-    --hui-text-secondary: #cbd5e1;
-    --hui-text-muted: #a0adc0;
-    --hui-text-inverse: #0f172a;
+    --hui-text: #ffffff;
+    --hui-text-secondary: #e6e7ff;
+    --hui-text-muted: #bcc0ec; /* ≥7,9:1 trên mọi nền tối (kể cả --hui-bg-tertiary) */
+    --hui-text-inverse: #0d0f26;
 
     /* === Token ngữ nghĩa === */
     --hui-bg-container: var(--hui-surface);
-    --hui-bg-elevated: #273449;
-    --hui-bg-spotlight: rgba(51, 65, 85, 0.95);
+    --hui-bg-elevated: #1d2050;
+    --hui-bg-spotlight: rgba(40, 44, 100, 0.96);
     --hui-text-tertiary: var(--hui-text-muted);
-    --hui-text-disabled: rgba(241, 245, 249, 0.3);
-    --hui-border-secondary: #1e293b;
-    --hui-fill: rgba(241, 245, 249, 0.18);
-    --hui-fill-secondary: rgba(241, 245, 249, 0.1);
-    --hui-fill-tertiary: rgba(241, 245, 249, 0.06);
+    --hui-text-disabled: rgba(230, 231, 255, 0.36);
+    --hui-border-secondary: #1f2350;
+    --hui-fill: rgba(185, 168, 255, 0.22);
+    --hui-fill-secondary: rgba(185, 168, 255, 0.12);
+    --hui-fill-tertiary: rgba(185, 168, 255, 0.07);
     --hui-shade-mix: #ffffff;
     color-scheme: dark; /* Thanh cuộn, ô input native, lịch native cũng chuyển tối */
 
-    --hui-border: #334155;
-    --hui-border-hover: #475569;
+    --hui-border: #30356f;
+    --hui-border-hover: #474e9a;
     --hui-border-focus: var(--hui-primary);
 
-    --hui-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --hui-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
-    --hui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-    --hui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-    --hui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    --hui-shadow-sm: 0 1px 2px rgba(3, 4, 18, 0.5);
+    --hui-shadow: 0 1px 3px rgba(3, 4, 18, 0.6), 0 1px 2px rgba(3, 4, 18, 0.5);
+    --hui-shadow-md: 0 4px 6px -1px rgba(3, 4, 18, 0.6), 0 2px 4px -2px rgba(3, 4, 18, 0.5);
+    --hui-shadow-lg: 0 10px 15px -3px rgba(3, 4, 18, 0.6), 0 4px 6px -4px rgba(3, 4, 18, 0.5);
+    --hui-shadow-xl: 0 20px 25px -5px rgba(3, 4, 18, 0.6), 0 8px 10px -6px rgba(3, 4, 18, 0.5);
   }
 }
 

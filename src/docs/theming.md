@@ -5,6 +5,18 @@ tự kế thừa xuyên Shadow DOM tới mọi component. Đổi token = đổi 
 > `<html data-theme="dark">` or automatically via `prefers-color-scheme`. Scope a theme to a subtree with
 > `<hui-config-provider theme="dark" primary-color="#e11d48">`. Shades `-1…-10`, hover and active are derived with `color-mix()`.
 
+## Bảng màu mặc định
+
+| | Theme sáng — pastel ngọc | Theme tối — xanh than tím |
+|---|---|---|
+| Nền trang `--hui-bg` | `#f2fbf8` | `#0d0f26` |
+| Khối nội dung `--hui-bg-container` / lớp nổi `--hui-bg-elevated` | `#ffffff` / `#ffffff` | `#15183a` / `#1d2050` |
+| Chữ chính / phụ / mờ | `#062421` / `#1f4743` / `#3d625d` | `#ffffff` / `#e6e7ff` / `#bcc0ec` |
+| `--hui-primary` | `#08695f` (ngọc đậm, chữ trắng ≈6,6:1) | `#b9a8ff` (tím lavender, chữ tối ≈9:1) |
+| Viền `--hui-border` | `#bfe5da` | `#30356f` |
+
+Mọi cặp chữ/nền mặc định đạt WCAG AA (≥ 4,5:1); chữ thường ≥ 9:1, chữ phụ không dùng xám nhạt.
+
 ## 1. Nhóm token
 
 | Nhóm | Token | Ghi chú |
