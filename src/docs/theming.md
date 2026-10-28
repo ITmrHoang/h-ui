@@ -7,13 +7,13 @@ tự kế thừa xuyên Shadow DOM tới mọi component. Đổi token = đổi 
 
 ## Bảng màu mặc định
 
-| | Theme sáng — pastel ngọc | Theme tối — xanh than tím |
+| | Theme sáng — pastel xanh dương trời | Theme tối — xanh than tím |
 |---|---|---|
-| Nền trang `--hui-bg` | `#f2fbf8` | `#0d0f26` |
+| Nền trang `--hui-bg` | `#f1f7ff` | `#0d0f26` |
 | Khối nội dung `--hui-bg-container` / lớp nổi `--hui-bg-elevated` | `#ffffff` / `#ffffff` | `#15183a` / `#1d2050` |
-| Chữ chính / phụ / mờ | `#062421` / `#1f4743` / `#3d625d` | `#ffffff` / `#e6e7ff` / `#bcc0ec` |
-| `--hui-primary` | `#08695f` (ngọc đậm, chữ trắng ≈6,6:1) | `#b9a8ff` (tím lavender, chữ tối ≈9:1) |
-| Viền `--hui-border` | `#bfe5da` | `#30356f` |
+| Chữ chính / phụ / mờ | `#0b2545` / `#24406a` / `#44608a` | `#ffffff` / `#e6e7ff` / `#bcc0ec` |
+| `--hui-primary` | `#0864ad` (xanh dương trời, chữ trắng ≈6,1:1) | `#8cc8ff` (xanh trời sáng, chữ tối ≈10,6:1) |
+| Viền `--hui-border` | `#c6dcf7` | `#30356f` |
 
 Mọi cặp chữ/nền mặc định đạt WCAG AA (≥ 4,5:1); chữ thường ≥ 9:1, chữ phụ không dùng xám nhạt.
 

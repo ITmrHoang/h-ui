@@ -37,12 +37,12 @@
 .hui-tag {
   /*
    * --_c   : màu chủ đạo (JS gán --_tag-color theo attribute color), mặc định secondary
-   * --_text: màu chữ cho soft/outlined — trộn 55% với màu chữ chính để đạt WCAG AA (≥4,5:1) cả với màu sáng (warning)
+   * --_text: màu chữ cho soft/outlined — trộn 50% với màu chữ chính để đạt WCAG AA (≥4,5:1) cả với màu sáng (warning)
    * --_on  : màu chữ trên nền đặc (filled / checked / selected) — tự chọn theo độ chói nền (xem @supports bên dưới)
    * --_bg/--_fg/--_bd: nền/chữ/viền do variant + trạng thái đặt; biến công khai luôn thắng
    */
   --_c: var(--_tag-color, var(--hui-secondary));
-  --_text: color-mix(in srgb, var(--_c) 55%, var(--hui-text));
+  --_text: color-mix(in srgb, var(--_c) 50%, var(--hui-text));
   --_on: var(--hui-text-inverse);
   --_bg: transparent;
   --_fg: var(--_text);

@@ -17,50 +17,50 @@
 :where(:root),
 :where([data-theme="light"]) {
   /* === Bảng màu chính === */
-  /* Xanh ngọc (jade) đậm: chữ trắng trên nút primary ≈6,6:1, chữ primary trên nền ngọc nhạt ≥5,3:1 */
-  --hui-primary: #08695f;
+  /* Xanh dương trời: chữ trắng trên nút primary ≈6,1:1, chữ primary trên nền xanh nhạt ≥4,8:1 */
+  --hui-primary: #0864ad;
 
-  --hui-secondary: #3f6662;
+  --hui-secondary: #4a6487;
 
   --hui-success: #10b981;
 
   --hui-warning: #f59e0b;
 
-  --hui-danger: #dc2626; /* Red-600: chữ trắng trên nền danger / chữ lỗi trên nền trắng đạt AA */
+  --hui-danger: #be1b1b; /* Chữ trắng trên nền danger / chữ lỗi trên mọi nền sáng ≥4,8:1 */
 
   --hui-info: #3b82f6;
 
   /* === Màu nền & text === */
-  /* Nền trang pastel ngọc sáng; khối nội dung (card, input, popup) trắng để nổi lên trên nền */
-  --hui-bg: #f2fbf8;
-  --hui-bg-secondary: #e4f6f0;
-  --hui-bg-tertiary: #d4efe6;
+  /* Nền trang pastel xanh dương sáng; khối nội dung (card, input, popup) trắng để nổi lên trên nền */
+  --hui-bg: #f1f7ff;
+  --hui-bg-secondary: #e3efff;
+  --hui-bg-tertiary: #d3e5fc;
   --hui-surface: #ffffff;
-  --hui-overlay: rgba(4, 30, 27, 0.5);
+  --hui-overlay: rgba(6, 22, 46, 0.5);
 
-  /* Chữ ngả ngọc rất đậm thay vì xám: chính ≈15:1, phụ ≈9:1, mờ ≥5,5:1 trên mọi nền sáng */
-  --hui-text: #062421;
-  --hui-text-secondary: #1f4743;
-  --hui-text-muted: #3d625d;
+  /* Chữ xanh navy đậm thay vì xám: chính ≈14:1, phụ ≈9:1, mờ ≥5:1 trên mọi nền sáng */
+  --hui-text: #0b2545;
+  --hui-text-secondary: #24406a;
+  --hui-text-muted: #44608a;
   --hui-text-inverse: #ffffff;
   --hui-text-light-solid: #ffffff; /* Chữ trắng ở MỌI theme — dùng trên nền tối cố định (tooltip, mask) */
 
   /* === Border === */
-  --hui-border: #bfe5da;
-  --hui-border-hover: #8fd1c2;
+  --hui-border: #c6dcf7;
+  --hui-border-hover: #94bdf0;
   --hui-border-focus: var(--hui-primary);
 
 
   /* === Token ngữ nghĩa (Ant: colorBgContainer / colorBgElevated / colorFill...) === */
   --hui-bg-container: var(--hui-surface);   /* Nền khối nội dung: card, input, table */
   --hui-bg-elevated: #ffffff;               /* Nền lớp nổi: dropdown, popover, modal */
-  --hui-bg-spotlight: rgba(6, 36, 33, 0.92); /* Nền tooltip */
+  --hui-bg-spotlight: rgba(11, 37, 69, 0.92); /* Nền tooltip */
   --hui-text-tertiary: var(--hui-text-muted);
-  --hui-text-disabled: rgba(6, 36, 33, 0.32);
-  --hui-border-secondary: #dcf2eb;          /* Viền mảnh: đường kẻ bảng, divider trong card */
-  --hui-fill: rgba(8, 105, 95, 0.18);       /* Nền thao tác đậm (thanh slider) */
-  --hui-fill-secondary: rgba(8, 105, 95, 0.08); /* Nền hover của item menu/list */
-  --hui-fill-tertiary: rgba(8, 105, 95, 0.05);  /* Nền nhẹ: input filled, thẻ tag mặc định */
+  --hui-text-disabled: rgba(11, 37, 69, 0.32);
+  --hui-border-secondary: #e1edfc;          /* Viền mảnh: đường kẻ bảng, divider trong card */
+  --hui-fill: rgba(8, 100, 173, 0.18);       /* Nền thao tác đậm (thanh slider) */
+  --hui-fill-secondary: rgba(8, 100, 173, 0.08); /* Nền hover của item menu/list */
+  --hui-fill-tertiary: rgba(8, 100, 173, 0.05);  /* Nền nhẹ: input filled, thẻ tag mặc định */
   /* Màu pha để tạo sắc độ đậm 7–10: theme sáng pha đen, theme tối pha trắng */
   --hui-shade-mix: #000000;
   color-scheme: light;
@@ -105,12 +105,12 @@
   --hui-font-weight-bold: 700;
 
   /* === Shadow === */
-  /* Bóng ngả ngọc (không xám) để khối trắng nổi trên nền pastel */
-  --hui-shadow-sm: 0 1px 2px rgba(6, 60, 54, 0.08);
-  --hui-shadow: 0 1px 3px rgba(6, 60, 54, 0.12), 0 1px 2px rgba(6, 60, 54, 0.08);
-  --hui-shadow-md: 0 4px 6px -1px rgba(6, 60, 54, 0.12), 0 2px 4px -2px rgba(6, 60, 54, 0.1);
-  --hui-shadow-lg: 0 10px 15px -3px rgba(6, 60, 54, 0.14), 0 4px 6px -4px rgba(6, 60, 54, 0.1);
-  --hui-shadow-xl: 0 20px 25px -5px rgba(6, 60, 54, 0.16), 0 8px 10px -6px rgba(6, 60, 54, 0.1);
+  /* Bóng ngả xanh dương (không xám) để khối trắng nổi trên nền pastel */
+  --hui-shadow-sm: 0 1px 2px rgba(11, 57, 110, 0.08);
+  --hui-shadow: 0 1px 3px rgba(11, 57, 110, 0.12), 0 1px 2px rgba(11, 57, 110, 0.08);
+  --hui-shadow-md: 0 4px 6px -1px rgba(11, 57, 110, 0.12), 0 2px 4px -2px rgba(11, 57, 110, 0.1);
+  --hui-shadow-lg: 0 10px 15px -3px rgba(11, 57, 110, 0.14), 0 4px 6px -4px rgba(11, 57, 110, 0.1);
+  --hui-shadow-xl: 0 20px 25px -5px rgba(11, 57, 110, 0.16), 0 8px 10px -6px rgba(11, 57, 110, 0.1);
 
   /* === Transition === */
   --hui-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -160,9 +160,9 @@
    ============================================ */
 
 :where([data-theme="dark"]) {
-  /* === Nền xanh than ngả tím (có chiều sâu: nền < khối < lớp nổi), chữ trắng; primary tím lavender
-     sáng để chữ tối trên nút ≈9:1 và chữ primary trên nền chọn của lớp nổi ≥5,5:1 === */
-  --hui-primary: #b9a8ff;
+  /* === Nền xanh than ngả tím (có chiều sâu: nền < khối < lớp nổi), chữ trắng; primary xanh trời
+     sáng để chữ tối trên nút ≈10,6:1 và chữ primary trên nền chọn của lớp nổi ≥6:1 === */
+  --hui-primary: #8cc8ff;
 
   --hui-secondary: #a9ade0;
 
@@ -194,9 +194,9 @@
   --hui-text-tertiary: var(--hui-text-muted);
   --hui-text-disabled: rgba(230, 231, 255, 0.36);
   --hui-border-secondary: #1f2350;
-  --hui-fill: rgba(185, 168, 255, 0.22);
-  --hui-fill-secondary: rgba(185, 168, 255, 0.12);
-  --hui-fill-tertiary: rgba(185, 168, 255, 0.07);
+  --hui-fill: rgba(140, 200, 255, 0.22);
+  --hui-fill-secondary: rgba(140, 200, 255, 0.12);
+  --hui-fill-tertiary: rgba(140, 200, 255, 0.07);
   --hui-shade-mix: #ffffff;
   color-scheme: dark; /* Thanh cuộn, ô input native, lịch native cũng chuyển tối */
 
@@ -216,7 +216,7 @@
 
 @media (prefers-color-scheme: dark) {
   :where(:root:not([data-theme])) {
-    --hui-primary: #b9a8ff;
+    --hui-primary: #8cc8ff;
 
     --hui-secondary: #a9ade0;
 
@@ -246,9 +246,9 @@
     --hui-text-tertiary: var(--hui-text-muted);
     --hui-text-disabled: rgba(230, 231, 255, 0.36);
     --hui-border-secondary: #1f2350;
-    --hui-fill: rgba(185, 168, 255, 0.22);
-    --hui-fill-secondary: rgba(185, 168, 255, 0.12);
-    --hui-fill-tertiary: rgba(185, 168, 255, 0.07);
+    --hui-fill: rgba(140, 200, 255, 0.22);
+    --hui-fill-secondary: rgba(140, 200, 255, 0.12);
+    --hui-fill-tertiary: rgba(140, 200, 255, 0.07);
     --hui-shade-mix: #ffffff;
     color-scheme: dark; /* Thanh cuộn, ô input native, lịch native cũng chuyển tối */
 
