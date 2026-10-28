@@ -290,8 +290,8 @@ Thiếu gì khi dựng → bổ sung vào backlog trước khi sang G2.
 - Tên npm `h-ui` và `hui-lib` đã thuộc người khác → dùng **`@itmrhoang/h-ui`** (đổi chỉ cần sửa `name` trong package.json).
 - Phát hành bằng **Changesets** (merge PR "chore: version packages" → publish + tag + GitHub Release); bản đầu `0.2.0`.
 - Thêm `scripts/check-static-build.mjs`: CI build trang mẫu và kiểm tra mọi thẻ được đăng ký (bắt lỗi `sideEffects`).
-- **Việc bạn cần làm 1 lần:** (1) npmjs.com → tạo token *Automation* → GitHub repo Secrets `NPM_TOKEN` (cho lần đăng đầu),
-  sau đó cấu hình Trusted Publisher (repo `ITmrHoang/h-ui`, workflow `release.yml`) rồi có thể xóa token;
+- **Việc bạn cần làm 1 lần:** (1) npmjs.com → tạo token *Automation* → Settings → Environments → `npm` → secret `NPM_TOKEN` (cho lần đăng đầu),
+  sau đó cấu hình Trusted Publisher (repo `ITmrHoang/h-ui`, workflow `release.yml`, environment `npm`) rồi có thể xóa token;
   (2) Settings → Actions → General → bật *Allow GitHub Actions to create and approve pull requests* (để mở PR version);
   (3) Settings → Branches → bảo vệ `main`, bắt buộc CI xanh.
 

@@ -1,7 +1,9 @@
 # Phát hành npm bằng Changesets:
 #  - main có file .changeset/*.md chưa phát hành → mở/cập nhật PR "chore: version packages"
 #  - merge PR đó → build + `changeset publish` (npm publish + gắn tag vX.Y.Z) + tạo GitHub Release
-# Xác thực npm: Trusted Publishing (OIDC, không cần token) — hoặc secret NPM_TOKEN cho lần đăng đầu tiên.
+# Xác thực npm: secret NPM_TOKEN đặt trong GitHub Environment "npm"
+#   (Settings → Environments → npm → Environment secrets; secret cùng tên ở mức repo vẫn dùng được)
+#   — hoặc Trusted Publishing (OIDC, không cần token) sau khi package đã có trên npmjs.com.
 name: Release
 
 on:
@@ -22,6 +24,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Gắn job vào environment để đọc secrets/vars của nó (NPM_TOKEN, NPM_TRUSTED_PUBLISHING)
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@itmrhoang/h-ui
     steps:
       - uses: actions/checkout@v7
         with:
@@ -38,7 +44,7 @@ jobs:
 
       - run: npm ci
 
-      # Chưa có NPM_TOKEN và chưa bật Trusted Publishing (biến repo NPM_TRUSTED_PUBLISHING=true)
+      # Chưa có NPM_TOKEN và chưa bật Trusted Publishing (biến NPM_TRUSTED_PUBLISHING=true, mức repo hoặc environment)
       # → chỉ mở/cập nhật PR "version packages", KHÔNG thử publish (tránh workflow đỏ mỗi lần push)
       - name: Kiểm tra quyền đăng npm
         id: npm-auth
