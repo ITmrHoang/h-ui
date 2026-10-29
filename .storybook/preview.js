@@ -22,7 +22,7 @@ const preview = {
       storySort: {
         order: [
           'Docs', ['Bắt đầu (Getting started)', 'Theming', 'Override', 'Accessibility & i18n'],
-          'Guide', 'Foundations', 'Atoms', 'Molecules', 'Organisms', 'Components', '*',
+          'Templates', 'Guide', 'Foundations', 'Atoms', 'Molecules', 'Organisms', 'Components', '*',
         ],
       },
     },
