@@ -974,8 +974,9 @@
     "check:types": "tsc -p tsconfig.types.json",
     "size": "node scripts/size-report.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts --no-audit --no-fund",
     "release": "npm run build && npm run build:cdn && changeset publish",
+    "prepublishOnly": "node -e \"for (const f of ['dist/index.esm.js','dist/types/index.d.ts','dist/cdn/h-ui.min.js']) { try { require('fs').accessSync(f) } catch { console.error('Thiếu ' + f + ' — chạy npm ci && npm run build && npm run build:cdn trước khi publish'); process.exit(1) } }\"",
     "analyze": "cem analyze",
     "check:static": "node scripts/check-static-build.mjs"
   },
