@@ -1,9 +1,9 @@
 # Phát hành npm bằng Changesets:
 #  - main có file .changeset/*.md chưa phát hành → mở/cập nhật PR "chore: version packages"
 #  - merge PR đó → build + `changeset publish` (npm publish + gắn tag vX.Y.Z) + tạo GitHub Release
-# Xác thực npm: secret NPM_TOKEN đặt trong GitHub Environment "npm"
-#   (Settings → Environments → npm → Environment secrets; secret cùng tên ở mức repo vẫn dùng được)
-#   — hoặc Trusted Publishing (OIDC, không cần token) sau khi package đã có trên npmjs.com.
+# Xác thực npm: CHỈ dùng Trusted Publishing (OIDC) — không cần NPM_TOKEN.
+#   Cấu hình trên npmjs.com → @itmrhoang/h-ui → Settings → Trusted Publisher → GitHub Actions:
+#   owner ITmrHoang · repo h-ui · workflow release.yml · environment npm (hoặc để trống)
 name: Release
 
 on:
@@ -18,13 +18,13 @@ concurrency:
 permissions:
   contents: write        # đẩy tag + tạo GitHub Release
   pull-requests: write   # mở PR "version packages"
-  id-token: write        # npm Trusted Publishing + provenance
+  id-token: write        # npm Trusted Publishing (OIDC) + provenance
 
 jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Gắn job vào environment để đọc secrets/vars của nó (NPM_TOKEN, NPM_TRUSTED_PUBLISHING)
+    # Tên environment phải khớp cấu hình Trusted Publisher trên npmjs.com (hoặc để trống ở đó)
     environment:
       name: npm
       url: https://www.npmjs.com/package/@itmrhoang/h-ui
@@ -37,43 +37,22 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          # KHÔNG đặt registry-url: setup-node sẽ ghi `_authToken=${NODE_AUTH_TOKEN}` vào .npmrc — kể cả khi token rỗng,
-          # npm dùng token rỗng đó và bỏ qua Trusted Publishing (OIDC) → ENEEDAUTH. Token (nếu có) được ghi ở bước dưới.
+          # KHÔNG đặt registry-url: setup-node sẽ ghi `_authToken=${NODE_AUTH_TOKEN}` vào .npmrc và npm sẽ dùng
+          # token rỗng đó thay vì Trusted Publishing (OIDC) → ENEEDAUTH
 
       # Trusted Publishing cần npm >= 11.5
       - run: npm install -g npm@latest
 
       - run: npm ci
 
-      # Chưa có NPM_TOKEN và chưa bật Trusted Publishing (biến NPM_TRUSTED_PUBLISHING=true, mức repo hoặc environment)
-      # → chỉ mở/cập nhật PR "version packages", KHÔNG thử publish (tránh workflow đỏ mỗi lần push)
-      - name: Kiểm tra quyền đăng npm
-        id: npm-auth
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          TRUSTED: ${{ vars.NPM_TRUSTED_PUBLISHING }}
-        run: |
-          if [ -n "$NPM_TOKEN" ]; then
-            # Có token → ghi vào .npmrc của user; không có thì npm tự dùng Trusted Publishing (OIDC, cần id-token: write)
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-          fi
-          if [ -n "$NPM_TOKEN" ] || [ "$TRUSTED" = "true" ]; then
-            echo "publish=npm run release" >> "$GITHUB_OUTPUT"
-          else
-            echo "publish=" >> "$GITHUB_OUTPUT"
-            echo "::notice::Chưa có NPM_TOKEN / Trusted Publishing — bỏ qua bước đăng npm."
-          fi
-
       - name: Version PR hoặc phát hành
         uses: changesets/action@v2
         with:
           version-script: npm run version-packages
-          publish-script: ${{ steps.npm-auth.outputs.publish }}
+          publish-script: npm run release
           pr-title: 'chore: version packages'
           commit-message: 'chore: version packages'
           create-github-releases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Không truyền NPM_TOKEN / NODE_AUTH_TOKEN ở đây: token (nếu có) đã nằm trong ~/.npmrc,
-          # còn biến rỗng sẽ chặn Trusted Publishing
           NPM_CONFIG_PROVENANCE: true
