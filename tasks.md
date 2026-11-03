@@ -265,7 +265,7 @@ Thiếu gì khi dựng → bổ sung vào backlog trước khi sang G2.
   Cần: Settings → Pages → Source = **GitHub Actions** (bạn bật 1 lần); Storybook cấu hình `base` đúng đường dẫn con `/HUI/`.
 - [x] **Phát hành npm** — `.github/workflows/release.yml`, chạy khi đẩy tag `v*` (hoặc tạo GitHub Release):
   kiểm tra version trong `package.json` khớp tag → build + test → `npm publish --provenance --access public`.
-  Xác thực bằng npm **Trusted Publishing (OIDC)** — không dùng token.
+  Xác thực bằng npm **Trusted Publishing (OIDC)** — không cần lưu token; hoặc secret `NPM_TOKEN` nếu chưa bật được.
   Bổ sung `package.json`: `repository`, `homepage` (link Storybook), `bugs`, `publishConfig`, `engines`; README song ngữ cập nhật.
 - [x] **CDN (jsDelivr / unpkg)** — có sẵn ngay sau khi lên npm, không cần server riêng:
   `<script type="module" src="https://cdn.jsdelivr.net/npm/<tên-gói>@0/dist/hui-button.esm.js"></script>`
@@ -290,8 +290,8 @@ Thiếu gì khi dựng → bổ sung vào backlog trước khi sang G2.
 - Tên npm `h-ui` và `hui-lib` đã thuộc người khác → dùng **`@itmrhoang/h-ui`** (đổi chỉ cần sửa `name` trong package.json).
 - Phát hành bằng **Changesets** (merge PR "chore: version packages" → publish + tag + GitHub Release); bản đầu `0.2.0`.
 - Thêm `scripts/check-static-build.mjs`: CI build trang mẫu và kiểm tra mọi thẻ được đăng ký (bắt lỗi `sideEffects`).
-- **Việc bạn cần làm 1 lần:** (1) npmjs.com → @itmrhoang/h-ui → Settings → Trusted Publisher → GitHub Actions:
-  owner `ITmrHoang`, repo `h-ui`, workflow `release.yml`, environment `npm` (không dùng NPM_TOKEN);
+- **Việc bạn cần làm 1 lần:** (1) npmjs.com → tạo token *Automation* → Settings → Environments → `npm` → secret `NPM_TOKEN` (cho lần đăng đầu),
+  sau đó cấu hình Trusted Publisher (repo `ITmrHoang/h-ui`, workflow `release.yml`, environment `npm`) rồi có thể xóa token;
   (2) Settings → Actions → General → bật *Allow GitHub Actions to create and approve pull requests* (để mở PR version);
   (3) Settings → Branches → bảo vệ `main`, bắt buộc CI xanh.
 
