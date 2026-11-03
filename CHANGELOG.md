@@ -1,5 +1,11 @@
 # @itmrhoang/h-ui
 
+## 0.5.1
+
+### Patch Changes
+
+- 91e89c4: Tài liệu: README tiếng Anh (trên) + tiếng Việt (dưới), thêm README.ko.md (tiếng Hàn); Storybook có mục Templates nhúng 10 trang mẫu.
+
 ## 0.5.0
 
 ### Minor Changes
