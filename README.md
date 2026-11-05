@@ -164,9 +164,15 @@ once components are loaded.
 > `:confirm-loading.camel`; add `.prop` too if the tag may load after mount). One-word ones (`:disabled`, `:loading`,
 > `:open`) are fine as is.
 >
-> **Modals**: `:open="visible"` opens / closes `hui-modal` (and `hui-command-palette`). Read the state with `isOpen`,
-> since `modal.open` is also the `open()` method (`show()` / `hide()` work too). Pressing Enter in a `hui-input` submits
-> its `<form>` like a native input.
+> **Overlays (modal, drawer, popover, dropdown, tooltip, pickers, tour…)** share one API: the `open` property
+> (a real boolean), `show()` / `hide()` / `toggle()`, and the events `hui-open` → `hui-after-open`,
+> `hui-close` → `hui-after-close`. In Vue, bind `:open` and sync back when the user closes it (X / Esc / mask):
+> `<hui-modal :open="visible" @hui-close="visible = false">`. Pressing Enter in a `hui-input` submits its `<form>`
+> like a native input.
+>
+> **Upgrading from 0.5.1 (breaking):** `modal.open()` → `modal.show()`, `close()` → `hide()` (`close()` still works,
+> deprecated), `isOpen` → `open`, `hui-open-change` / `open-change` → `hui-open` / `hui-close` (old events still fire,
+> deprecated); `hui-cookie-consent` `open()` → `show()`.
 
 Type hints (Volar): importing the plugin adds `GlobalComponents` for every tag (props, `@events`, `v-model`);
 without the plugin, add `"@itmrhoang/h-ui/types/vue"` to `compilerOptions.types` in tsconfig.
@@ -416,9 +422,15 @@ directive `v-hui-model` (`directive: false` để tắt), gắn `isCustomElement
 > (có mặt là **true**, kể cả `"false"`). Hãy viết `:confirmLoading="saving"` (hoặc `:confirm-loading.camel`; thêm `.prop` nếu
 > thẻ có thể được define sau khi mount). Boolean một từ (`:disabled`, `:loading`, `:open`) dùng bình thường.
 >
-> **Modal**: `:open="visible"` mở / đóng được `hui-modal` (và `hui-command-palette`). Đọc trạng thái bằng `isOpen` vì
-> `modal.open` đồng thời là method `open()` (dùng `show()` / `hide()` cũng được). Nhấn Enter trong `hui-input` gửi
-> `<form>` chứa nó như `<input>` thường.
+> **Overlay (modal, drawer, popover, dropdown, tooltip, picker, tour…)** dùng chung một API: property `open`
+> (boolean thật), `show()` / `hide()` / `toggle()`, sự kiện `hui-open` → `hui-after-open`, `hui-close` → `hui-after-close`.
+> Trong Vue: gán `:open` và đồng bộ lại khi người dùng tự đóng (X / Esc / mask):
+> `<hui-modal :open="visible" @hui-close="visible = false">`. Nhấn Enter trong `hui-input` gửi `<form>` chứa nó
+> như `<input>` thường.
+>
+> **Nâng cấp từ 0.5.1 (phá vỡ API):** `modal.open()` → `modal.show()`, `close()` → `hide()` (`close()` vẫn chạy,
+> deprecated), `isOpen` → `open`, `hui-open-change` / `open-change` → `hui-open` / `hui-close` (sự kiện cũ vẫn phát,
+> deprecated); `hui-cookie-consent` `open()` → `show()`.
 
 Gợi ý kiểu (Volar): import plugin là có `GlobalComponents` cho mọi thẻ (props, `@sự-kiện`, `v-model`);
 không dùng plugin thì thêm `"@itmrhoang/h-ui/types/vue"` vào `compilerOptions.types` của tsconfig.

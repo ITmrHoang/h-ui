@@ -121,7 +121,9 @@ vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('h
 |--------|---------|
 | Attribute ↔ property | `max-count` ↔ `maxCount`; boolean: **có mặt = true** (`disabled="false"` vẫn là true — xóa attribute để tắt) |
 | Mảng / object | Gán bằng **property** (`el.options = [...]`); attribute nhận JSON khi cần |
-| Sự kiện | Tên `hui-*` (`hui-click`, `hui-change`, `hui-select`…) + `input` / `change` cho form control; `e.detail` chứa dữ liệu; nhiều sự kiện **cancelable** (`preventDefault()`) |
+| Method | Động từ (`show()`, `reset()`, `exportCsv()`), **không trùng tên property** |
+| Sự kiện | Tên `hui-*` (`hui-click`, `hui-change`, `hui-select`…) + `input` / `change` cho form control; `e.detail` luôn là object; nhiều sự kiện **cancelable** (`preventDefault()`) |
+| Overlay | Mọi thứ mở / đóng được (modal, drawer, popover, dropdown, tooltip, picker, tour…): property `open` (boolean) + `show()` / `hide()` / `toggle()` + sự kiện `hui-open` → `hui-after-open`, `hui-close` → `hui-after-close` |
 | Form | Mọi control (`hui-input`, `hui-select`, `hui-date-picker`, `hui-transfer`…) gửi được qua `<form>` (ElementInternals), có `name`, `required`, `reset` |
 | Dữ liệu | Component dữ liệu nhận `data` / `src` (+ `data-path`) / `fetchFn(params, { signal })`, tự có skeleton – empty – error |
 | Hiệu ứng | Bật mặc định; `no-animation` để tắt từng thẻ; luôn tôn trọng `prefers-reduced-motion` |

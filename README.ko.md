@@ -164,9 +164,15 @@ createApp(App).use(HuiVue, { components: false }).mount('#app');
 > `:confirm-loading.camel`, 마운트 후 태그가 정의될 수 있다면 `.prop` 추가)으로 작성하세요. 한 단어(`:disabled`,
 > `:loading`, `:open`)는 그대로 쓰면 됩니다.
 >
-> **모달**: `:open="visible"`로 `hui-modal`(및 `hui-command-palette`)을 열고 닫을 수 있습니다. `modal.open`은 `open()`
-> 메서드이기도 하므로 상태는 `isOpen`으로 읽으세요(`show()` / `hide()`도 사용 가능). `hui-input`에서 Enter를 누르면
-> 네이티브 input처럼 해당 `<form>`이 제출됩니다.
+> **오버레이(modal, drawer, popover, dropdown, tooltip, picker, tour…)** 는 같은 API를 씁니다: `open` property(실제
+> 불리언), `show()` / `hide()` / `toggle()`, 이벤트 `hui-open` → `hui-after-open`, `hui-close` → `hui-after-close`.
+> Vue에서는 `:open`을 바인딩하고 사용자가 닫을 때(X / Esc / 마스크) 상태를 되돌리세요:
+> `<hui-modal :open="visible" @hui-close="visible = false">`. `hui-input`에서 Enter를 누르면 네이티브 input처럼
+> 해당 `<form>`이 제출됩니다.
+>
+> **0.5.1에서 업그레이드(호환성 깨짐):** `modal.open()` → `modal.show()`, `close()` → `hide()`(`close()`는 deprecated로
+> 계속 동작), `isOpen` → `open`, `hui-open-change` / `open-change` → `hui-open` / `hui-close`(기존 이벤트도 deprecated로
+> 계속 발생), `hui-cookie-consent`의 `open()` → `show()`.
 
 타입 힌트(Volar): 플러그인을 import하면 모든 태그에 대한 `GlobalComponents`(props, `@이벤트`, `v-model`)가 추가됩니다.
 플러그인 없이 쓰려면 tsconfig의 `compilerOptions.types`에 `"@itmrhoang/h-ui/types/vue"`를 추가하세요.

@@ -18,6 +18,7 @@ d:\HoangProject\ui-lib\
 │   └── rules/
 │       ├── GEMINI.md          # Quy tắc tổng quát cho Agent
 │       ├── storybook_rule.md  # Bắt buộc viết story khi tạo component mới
+│       ├── naming_rule.md     # Đặt tên property / method / sự kiện, API overlay chung
 │       └── ...
 │
 ├── src/                       # Thư mục mã nguồn chính gốc
