@@ -7,6 +7,8 @@
 import { html, nothing } from 'lit';
 import { expect, userEvent, waitFor } from 'storybook/test';
 import './index.js';
+// Nút submit cho demo Enter gửi form
+import '../hui-button/index.js';
 
 export default {
   title: 'Components/HuiInput',
@@ -71,6 +73,11 @@ export default {
 \`checkValidity()\` / \`reportValidity()\` (required, minlength, maxlength, pattern, type email/url).
 CSS bắt lỗi sau khi người dùng đã tương tác: \`hui-input:state(user-invalid)\`.
 
+**Enter gửi form** như \`<input>\` thường (implicit submission): có nút submit đầu tiên (\`<button>\` /
+\`<hui-button type="submit">\`) thì gửi qua nút đó — nút đang \`disabled\` / \`loading\` thì không gửi; không có nút submit thì
+chỉ gửi khi form có đúng 1 ô nhập. Bỏ qua khi đang gõ bằng bộ gõ IME, khi kèm Shift / Ctrl / Alt / Meta, hoặc khi
+\`keydown\` bị \`preventDefault()\` (vd: Vue \`@keydown.enter.prevent\`).
+
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
@@ -92,6 +99,7 @@ CSS bắt lỗi sau khi người dùng đã tương tác: \`hui-input:state(user
 | Phím | Tác dụng |
 |------|----------|
 | \`Tab\` | Vào ô nhập → nút ẩn/hiện mật khẩu (nút xóa không nhận focus) |
+| \`Enter\` trong ô nhập | Gửi \`<form>\` chứa nó (xem mục Form) |
 | \`Space\` / \`Enter\` trên nút con mắt | Bật/tắt hiện mật khẩu (\`aria-pressed\`) |
 
 ### Override giao diện từ bên ngoài
@@ -580,6 +588,52 @@ export const InForm = {
     form.reset();
     await expect(user.value).toBe('hoang');
     await expect(pass.value).toBe('');
+  },
+};
+
+/**
+ * Enter gửi form — như `<input>` thường: nhấn Enter trong ô nhập là submit `<form>` chứa nó
+ * (qua `<hui-button type="submit">`; nút đang `loading` / `disabled` thì không gửi).
+ */
+export const EnterSubmit = {
+  render: () => html`
+    <form id="enter-form" style="display: flex; flex-direction: column; gap: 12px; max-width: 400px;"
+      @submit=${(e) => {
+        e.preventDefault();
+        const out = e.target.querySelector('output');
+        out.dataset.count = String(Number(out.dataset.count || 0) + 1);
+        out.textContent = `Đã gửi ${out.dataset.count} lần: ${JSON.stringify(Object.fromEntries(new FormData(e.target)))}`;
+      }}>
+      <hui-input name="email" label="Email" type="email" value="ban@vi-du.vn" placeholder="Nhấn Enter để gửi"></hui-input>
+      <hui-button type="submit" variant="primary">Đăng nhập</hui-button>
+      <output style="font-family: monospace; font-size: 12px;"></output>
+    </form>
+  `,
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector('#enter-form');
+    const input = form.querySelector('hui-input');
+    const button = form.querySelector('hui-button');
+    const out = form.querySelector('output');
+    const count = () => Number(out.dataset.count || 0);
+
+    input.focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(count()).toBe(1));
+    await expect(out.textContent).toContain('ban@vi-du.vn');
+
+    // Nút submit đang loading (vd: đang gọi API) → Enter không gửi lặp
+    button.loading = true;
+    input.focus();
+    await userEvent.keyboard('{Enter}');
+    await new Promise((r) => setTimeout(r, 50));
+    await expect(count()).toBe(1);
+    button.loading = false;
+
+    // Shift+Enter không gửi
+    input.focus();
+    await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+    await new Promise((r) => setTimeout(r, 50));
+    await expect(count()).toBe(1);
   },
 };
 

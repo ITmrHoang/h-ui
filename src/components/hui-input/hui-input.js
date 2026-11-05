@@ -37,8 +37,36 @@ const msg = (key) => {
 /** <input> tách rời để kiểm định dạng email/url theo đúng luật của trình duyệt */
 let probe = null;
 
+/** Kiểu <input> native được tính là "ô chặn implicit submission" (HTML spec) */
+const IMPLICIT_SUBMIT_TYPES = new Set([
+  'text', 'search', 'url', 'tel', 'email', 'password', 'date', 'month', 'week', 'time', 'datetime-local', 'number',
+]);
+
 /**
- * Ô nhập liệu một dòng, tham gia <form> native.
+ * Enter trong ô nhập → gửi form giống <input> native (implicit submission).
+ * <input> thật nằm trong Shadow DOM nên trình duyệt không tự làm việc này cho <form> bên ngoài.
+ * - Form có nút submit (nút submit đầu tiên = nút mặc định): nút đang disabled / loading → không gửi;
+ *   nút native → click() (giữ submitter + @click như trình duyệt); hui-button → requestSubmit()
+ * - Không có nút submit: chỉ gửi khi form có đúng 1 ô nhập dạng chữ (giống trình duyệt)
+ * requestSubmit() chạy validate + phát sự kiện submit như khi bấm nút.
+ */
+function implicitSubmit(form) {
+  const fields = [...form.elements];
+  const button = fields.find((el) => el.type === 'submit' || (el.localName === 'input' && el.type === 'image'));
+  if (button) {
+    if (button.matches(':disabled') || button.loading) return;
+    if (button.localName === 'button' || button.localName === 'input') button.click();
+    else form.requestSubmit();
+    return;
+  }
+  const textFields = fields.filter((el) => el.localName === 'hui-input'
+    || (el.localName === 'input' && IMPLICIT_SUBMIT_TYPES.has(el.type)));
+  if (textFields.length <= 1) form.requestSubmit();
+}
+
+/**
+ * Ô nhập liệu một dòng, tham gia <form> native. Enter gửi form chứa nó như <input> thường
+ * (bỏ qua khi đang gõ bằng bộ gõ IME, khi kèm Shift/Ctrl/Alt/Meta, hoặc khi keydown bị preventDefault()).
  * @fires input - Khi gõ chữ, detail: { value }
  * @fires change - Khi giá trị đã đổi và rời ô nhập, detail: { value }
  * @fires hui-search - type="search": phát sau 300ms ngừng gõ, detail: { value }
@@ -148,6 +176,7 @@ class HuiInput extends HuiFormElement {
     this._input.addEventListener('input', () => {
       if (this.type === 'search') this._debouncedSearch(this._input.value);
     });
+    this._input.addEventListener('keydown', (e) => this._handleEnter(e));
 
     this._iconLeft = createElement('span', {
       className: 'hui-input__icon hui-input__icon--left', part: 'icon icon-left', 'aria-hidden': 'true',
@@ -312,6 +341,19 @@ class HuiInput extends HuiFormElement {
     this._toggleBtn.hidden = !this._isPassword;
     this._toggleBtn.setAttribute('aria-pressed', String(Boolean(this.passwordVisible)));
     this._toggleIcon.name = this.passwordVisible ? 'eye' : 'eye-off';
+  }
+
+  /** Enter → gửi <form> chứa ô nhập (xem implicitSubmit) */
+  _handleEnter(e) {
+    // Enter đang chốt chữ của bộ gõ (IME: isComposing, Safari báo keyCode 229) hoặc kèm phím bổ trợ → bỏ qua
+    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+    if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+    const form = this.form;
+    if (!form) return;
+    // Chờ hết lượt phát sự kiện: listener bên ngoài (vd Vue @keydown.enter.prevent trên thẻ / form) vẫn chặn được
+    setTimeout(() => {
+      if (!e.defaultPrevented && this.isConnected && this.form === form) implicitSubmit(form);
+    });
   }
 
   _togglePassword() {
