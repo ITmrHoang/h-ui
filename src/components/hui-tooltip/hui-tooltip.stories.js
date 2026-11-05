@@ -50,7 +50,9 @@ luôn nằm trong viewport (cách mép 8px), tự định vị lại khi cuộn 
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
-| \`open-change\` | \`{ open: boolean }\` | Phát khi tooltip mở/đóng do người dùng hoặc method (không phát khi đổi attribute \`open\` từ ngoài) |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng (người dùng, method hay gán \`open\`; không phát khi render lần đầu) |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+| \`open-change\` | \`{ open: boolean }\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\` |
 
 ### Slots
 | Slot | Mô tả |

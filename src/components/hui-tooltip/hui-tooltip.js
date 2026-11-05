@@ -3,7 +3,7 @@
  * Định vị bằng utils/floating.js: 12 vị trí (+ tên kiểu Ant topLeft...), tự lật, bám theo khi cuộn,
  * popup nằm trên top-layer (Popover API) nên không bị overflow/z-index của thẻ cha che.
  * Parts: trigger, popup, content, arrow · Slots: (mặc định) trigger, content
- * Event: open-change { open } · Methods: show(), hide(), toggle()
+ * Events: hui-open, hui-after-open, hui-close, hui-after-close (open-change: cũ) · Methods: show(), hide(), toggle()
  * Biến CSS: xem đầu hui-tooltip.css.
  */
 
@@ -17,7 +17,11 @@ const COLOR_VARIANTS = ['primary', 'secondary', 'success', 'warning', 'danger', 
 let uid = 0;
 
 /**
- * @fires open-change - Mở/đóng do người dùng hoặc method (không phát khi đổi attribute open từ ngoài). detail: { open }
+ * @fires hui-open - Bắt đầu mở (người dùng, method hay gán open; không phát khi render lần đầu với sẵn open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Mở/đóng do người dùng hoặc method. detail: { open }
  * @slot - Phần tử kích hoạt (trigger)
  * @slot content - Nội dung HTML (ưu tiên hơn attribute content)
  * @csspart trigger - Khung bọc trigger
@@ -141,7 +145,7 @@ class HuiTooltip extends HuiElement {
     }, { capture: true });
 
     // Gắn lại vào trang khi đang có attribute open
-    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open));
+    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open, true));
   }
 
   disconnectedCallback() {
@@ -190,7 +194,7 @@ class HuiTooltip extends HuiElement {
 
     if (changed.has('open')) {
       // Lần đầu: đợi 1 frame cho layout + slot ổn định rồi mới đo vị trí
-      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open));
+      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open, true));
       else this._applyOpen(this.open);
     }
 
@@ -255,8 +259,8 @@ class HuiTooltip extends HuiElement {
     this.emit('open-change', { open });
   }
 
-  /** Áp trạng thái lên DOM (không phát sự kiện) */
-  _applyOpen(open) {
+  /** Áp trạng thái lên DOM + phát hui-open / hui-close… (`initial` = trạng thái lúc render đầu: không phát) */
+  _applyOpen(open, initial = false) {
     if (open && (this.disabled || !this.isConnected || !this._hasContent())) open = false;
     if (open === this._shown) return;
     this._shown = open;
@@ -269,17 +273,19 @@ class HuiTooltip extends HuiElement {
       popup.getAnimations?.().forEach((a) => a.cancel()); // dọn khung cuối của lần đóng trước
       showFloating(popup, '--hui-z-tooltip');
       this._stopAutoUpdate = autoUpdate(this, popup, () => this._position());
-      animateIn(popup, 'zoom', { origin: this._origin });
+      const shown = animateIn(popup, 'zoom', { origin: this._origin });
+      if (!initial) this._emitOpenEvents(true, shown);
       return;
     }
 
     this._stopAutoUpdate?.();
     this._stopAutoUpdate = null;
-    animateOut(popup, 'zoom', { origin: this._origin }).then(() => {
+    const hidden = animateOut(popup, 'zoom', { origin: this._origin }).then(() => {
       if (token !== this._token) return; // đã mở lại trong lúc đang đóng
       hideFloating(popup);
       popup.getAnimations?.().forEach((a) => a.cancel());
     });
+    if (!initial) this._emitOpenEvents(false, hidden);
   }
 
   _position() {

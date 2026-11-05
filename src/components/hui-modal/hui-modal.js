@@ -6,7 +6,8 @@
  * Parts: dialog, mask, panel, header, title, close, body, footer, ok-button, cancel-button,
  *        confirm-icon, confirm-title (chế độ confirm-type)
  * Slots: (mặc định) nội dung, title, footer (thay cụm nút mặc định)
- * Events: hui-open, hui-close, hui-after-close, hui-ok (cancelable), hui-cancel (cancelable)
+ * Events: hui-open, hui-after-open, hui-close, hui-after-close, hui-ok (cancelable), hui-cancel (cancelable)
+ * API overlay chung: property open + show() / hide() / toggle() (xem .agents/rules/naming_rule.md)
  * Biến CSS: xem đầu hui-modal.css.
  */
 
@@ -29,7 +30,8 @@ let uid = 0;
 const toLength = (v) => (/^\d+(\.\d+)?$/.test(String(v).trim()) ? `${v}px` : String(v));
 
 /**
- * @fires hui-open - Modal vừa mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-open - Modal bắt đầu mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
  * @fires hui-close - Modal bắt đầu đóng
  * @fires hui-after-close - Đã đóng xong (hết animation); destroy-on-close đã gỡ nội dung dựng từ <template>
  * @fires hui-ok - Bấm nút OK mặc định. Cancelable: preventDefault() để giữ modal mở
@@ -67,10 +69,7 @@ const toLength = (v) => (/^\d+(\.\d+)?$/.test(String(v).trim()) ? `${v}px` : Str
  */
 class HuiModal extends HuiElement {
   static properties = {
-    /**
-     * Trạng thái mở. Gán `modal.open = true / false` (Vue `:open`, React 19) để mở / đóng.
-     * Đọc bằng `isOpen`: `modal.open` trả về method `open()` (giữ API cũ) — xem HuiElement.observedAttributes
-     */
+    /** Trạng thái mở: đọc / gán `modal.open = true | false` (Vue `:open`, React 19) — hoặc show() / hide() / toggle() */
     open: { type: Boolean },
     /** Tiêu đề (hoặc dùng slot="title") */
     title: { type: String },
@@ -117,28 +116,32 @@ class HuiModal extends HuiElement {
   // PUBLIC API
   // =====================================================
 
-  /** Mở modal (giữ API cũ). Tương đương `show()` / `modal.open = true` */
-  open() {
-    this._setProp('open', true);
-  }
+  // Quy ước overlay chung (drawer, popover, dropdown...): property `open` + show() / hide() / toggle().
+  // Không có method open() — trùng tên property (xem HuiElement._methodConflicts).
 
-  /** Đóng modal (không phát hui-cancel). Tương đương `hide()` / `modal.open = false` */
-  close() {
-    this._setProp('open', false);
-  }
-
-  /** Mở modal — cùng tên với hui-drawer, hui-popover... */
+  /** Mở modal (= `modal.open = true`) */
   show() {
-    this._setProp('open', true);
+    this.open = true;
   }
 
-  /** Đóng modal (không phát hui-cancel) — cùng tên với hui-drawer, hui-popover... */
+  /** Đóng modal, không phát hui-cancel (= `modal.open = false`) */
   hide() {
-    this._setProp('open', false);
+    this.open = false;
   }
 
+  /** Mở ↔ đóng */
+  toggle() {
+    this.open = !this.open;
+  }
+
+  /** @deprecated Dùng hide() — giữ tạm cho code cũ, sẽ bỏ */
+  close() {
+    this.hide();
+  }
+
+  /** @deprecated Đọc `open` — giữ tạm cho code cũ, sẽ bỏ */
   get isOpen() {
-    return this._props.open;
+    return this.open;
   }
 
   get _closable() {
@@ -188,7 +191,7 @@ class HuiModal extends HuiElement {
     this._cancelBtn.addEventListener('hui-click', () => this._dismiss());
     this._okBtn.addEventListener('hui-click', () => {
       if (this.confirmLoading) return;
-      if (this.emit('hui-ok', null, { cancelable: true })) this.close();
+      if (this.emit('hui-ok', null, { cancelable: true })) this.hide();
     });
     this._footer = createElement('div', { className: 'footer', part: 'footer' },
       createElement('slot', { name: 'footer' }, this._cancelBtn, this._okBtn));
@@ -209,7 +212,7 @@ class HuiModal extends HuiElement {
     // 'close' đến sau 1 task: nếu đã mở lại ngay (dialog.open = true) thì bỏ qua, tránh đóng nhầm
     this._dialog.addEventListener('close', () => {
       if (!this._props.open || this._dialog.open) return;
-      if (this._closable) this.close();
+      if (this._closable) this.hide();
       else this._showDialog();
     });
 
@@ -282,10 +285,9 @@ class HuiModal extends HuiElement {
 
     if (changed.has('open')) {
       const first = !this._mounted;
-      if (this._props.open) this._show();
-      else if (!first) this._hide();
-      // Giữ hành vi cũ: không phát sự kiện ở lần render đầu
-      if (!first) this.emit(this._props.open ? 'hui-open' : 'hui-close');
+      const done = this._props.open ? this._show() : first ? null : this._hide();
+      // Không phát sự kiện ở lần render đầu (đã có sẵn attribute open)
+      if (!first) this._emitOpenEvents(this._props.open, done);
     }
   }
 
@@ -300,7 +302,7 @@ class HuiModal extends HuiElement {
   /** Người dùng muốn đóng (X, Hủy, Esc, mask) → hui-cancel có thể bị chặn */
   _dismiss() {
     if (!this._props.open) return;
-    if (this.emit('hui-cancel', null, { cancelable: true })) this.close();
+    if (this.emit('hui-cancel', null, { cancelable: true })) this.hide();
   }
 
   _showDialog() {
@@ -348,8 +350,7 @@ class HuiModal extends HuiElement {
     }
     this._showDialog();
     this.setState('open', true);
-    animateIn(this._mask, 'fade');
-    animateIn(this._panel, 'zoom');
+    return Promise.all([animateIn(this._mask, 'fade'), animateIn(this._panel, 'zoom')]);
   }
 
   async _hide() {
@@ -370,7 +371,6 @@ class HuiModal extends HuiElement {
     this._handle?.close();
     this._handle = null;
     if (this.destroyOnClose) this._destroyContent();
-    this.emit('hui-after-close');
   }
 }
 

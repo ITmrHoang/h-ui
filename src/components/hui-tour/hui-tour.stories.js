@@ -42,8 +42,8 @@ không có / không tìm thấy → khung ở giữa màn hình), \`title\`, \`d
 \`onEnter({current, step, tour})\` (async, chạy trước khi hiện bước — vd mở menu để đích xuất hiện),
 \`beforeNext({current, step, tour})\` (async, trả \`false\` để chặn sang bước sau; nút Tiếp hiện loading khi chờ).
 
-**Sự kiện:** \`hui-change\` {current, previous} · \`hui-finish\` {current} · \`hui-close\` {current, reason: close | escape | skip | finish}
-**Phương thức:** \`start(index?)\`, \`next()\`, \`prev()\`, \`goTo(index)\`, \`close()\`, \`reposition()\`
+**Sự kiện:** \`hui-change\` {current, previous} · \`hui-finish\` {current} · \`hui-open\` / \`hui-after-open\` {current} · \`hui-close\` / \`hui-after-close\` {current, reason: close | escape | skip | finish}
+**Phương thức:** \`start(index?)\`, \`show()\`, \`hide()\`, \`toggle()\`, \`next()\`, \`prev()\`, \`goTo(index)\`, \`reposition()\` — \`close()\` cũ là tên khác của \`hide()\` (deprecated)
 **Parts:** mask, spotlight, panel, arrow, close, cover, title, description, footer, indicator, skip-button, prev-button, next-button
 **Biến CSS:** \`--hui-tour-mask-color\`, \`-width\`, \`-bg\`, \`-color\`, \`-title-color\`, \`-radius\`, \`-shadow\`, \`-padding\`, \`-primary-bg\`, \`-duration\`, \`-spotlight-ring\`
 

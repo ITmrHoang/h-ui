@@ -26,7 +26,11 @@ const MANAGED = ['HUI-FLOAT-BUTTON', 'HUI-BACK-TOP'];
 let uid = 0;
 
 /**
- * @fires open-change - Mở/đóng do người dùng (click, hover, Esc, click ngoài) hoặc method. detail: { open }
+ * @fires hui-open - Bắt đầu mở (người dùng, method hay gán open; không phát khi render lần đầu)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Mở/đóng do người dùng hoặc method. detail: { open }
  * @slot - Các nút con (hui-float-button, hui-back-top...)
  * @slot icon - Icon tùy chỉnh cho nút chính
  * @csspart base - Khung bọc danh sách + nút chính
@@ -156,7 +160,11 @@ class HuiFloatGroup extends HuiElement {
 
     if (changed.has('trigger')) this._toggle.hidden = this.trigger === 'none';
 
-    if (changed.has('trigger') || changed.has('open')) this._applyOpen(this.trigger === 'none' || this.open);
+    if (changed.has('trigger') || changed.has('open')) {
+      // Lần render đầu: chỉ áp trạng thái, không phát sự kiện
+      this._applyOpen(this.trigger === 'none' || this.open, !this._openApplied);
+      this._openApplied = true;
+    }
 
     if (changed.has('icon') || changed.has('closeIcon') || changed.has('open')) this._syncToggleIcon();
   }
@@ -201,8 +209,8 @@ class HuiFloatGroup extends HuiElement {
     this.emit('open-change', { open });
   }
 
-  /** Áp trạng thái mở/đóng lên DOM (không phát sự kiện) */
-  _applyOpen(open) {
+  /** Áp trạng thái mở/đóng lên DOM + phát hui-open / hui-close… (`initial` = lúc render đầu: không phát) */
+  _applyOpen(open, initial = false) {
     const always = this.trigger === 'none';
     // Đổi trigger sang none khi đang có overlay → gỡ overlay (luôn bung, không cần Esc)
     if (always && this._overlay) {
@@ -220,7 +228,7 @@ class HuiFloatGroup extends HuiElement {
 
     if (open) {
       this._list.hidden = false;
-      this._stagger(true);
+      const shown = this._stagger(true);
       if (!always && !this._overlay) {
         this._overlay = openOverlay({
           element: this,
@@ -232,16 +240,18 @@ class HuiFloatGroup extends HuiElement {
           onClickOutside: () => this._setOpen(false),
         });
       }
+      if (!initial) this._emitOpenEvents(true, shown);
       return;
     }
 
     this._overlay?.close();
     this._overlay = null;
-    this._stagger(false).then(() => {
+    const hidden = this._stagger(false).then(() => {
       if (token !== this._token) return; // đã mở lại trong lúc đang đóng
       this._list.hidden = true;
       this._cancelAnims();
     });
+    if (!initial) this._emitOpenEvents(false, hidden);
   }
 
   _cancelAnims() {

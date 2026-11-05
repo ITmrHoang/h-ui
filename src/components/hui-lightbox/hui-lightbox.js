@@ -33,8 +33,10 @@ function normalize(item) {
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
 /**
- * @fires hui-open - Lightbox vừa mở. detail: { index }
+ * @fires hui-open - Lightbox bắt đầu mở. detail: { index }
+ * @fires hui-after-open - Đã mở xong (hết animation). detail: { index }
  * @fires hui-close - Lightbox bắt đầu đóng. detail: { index }
+ * @fires hui-after-close - Đã đóng xong (hết animation). detail: { index }
  * @fires hui-change - Chuyển sang ảnh khác. detail: { index, item }
  * @csspart dialog - Thẻ <dialog> phủ toàn màn hình
  * @csspart mask - Nền tối phía sau
@@ -68,7 +70,7 @@ class HuiLightbox extends HuiElement {
     items: { type: Array },
     /** Chỉ số ảnh đang xem (0-based) */
     index: { type: Number, default: 0 },
-    /** Đang mở. Mở bằng `show(index)`, đóng bằng `close()` */
+    /** Đang mở: đọc / gán `lb.open = true | false` — hoặc show(index) / hide() */
     open: { type: Boolean },
     /** Ảnh cuối → ảnh đầu (và ngược lại) */
     loop: { type: Boolean },
@@ -118,7 +120,7 @@ class HuiLightbox extends HuiElement {
     this._downloadBtn = createElement('a', {
       className: 'btn btn--download', part: 'download', download: '', target: '_blank', rel: 'noopener',
     }, createElement('hui-icon', { name: 'download' }));
-    this._closeBtn = btn('close', 'close', () => this.close());
+    this._closeBtn = btn('close', 'close', () => this.hide());
     // overlay.js focus phần tử [autofocus] đầu tiên khi mở
     this._closeBtn.setAttribute('autofocus', '');
 
@@ -148,10 +150,10 @@ class HuiLightbox extends HuiElement {
     // Esc do overlay manager xử lý; 'cancel' native (nút Back Android…) đi cùng đường đó
     this._dialog.addEventListener('cancel', (e) => {
       e.preventDefault();
-      if (this._handle?.isTop()) this.close();
+      if (this._handle?.isTop()) this.hide();
     });
     this._dialog.addEventListener('close', () => {
-      if (this._props.open) this.close();
+      if (this._props.open) this.hide();
     });
     this._dialog.addEventListener('keydown', (e) => this._onKeydown(e));
 
@@ -205,9 +207,8 @@ class HuiLightbox extends HuiElement {
 
     if (changed.has('open')) {
       const first = !this._mounted;
-      if (this._props.open) this._show();
-      else if (!first) this._hide();
-      if (!first) this.emit(this._props.open ? 'hui-open' : 'hui-close', { index: this.index });
+      const done = this._props.open ? this._show() : first ? null : this._hide();
+      if (!first) this._emitOpenEvents(this._props.open, done, { index: this.index });
     } else if (this._props.open && ['items', 'index', 'loop', 'locale', 'noDownload'].some((k) => changed.has(k))) {
       const dir = this._navDir;
       this._navDir = 0;
@@ -261,8 +262,20 @@ class HuiLightbox extends HuiElement {
     this.open = true;
   }
 
-  close() {
+  /** Đóng lightbox (= `lb.open = false`) */
+  hide() {
     this.open = false;
+  }
+
+  /** Mở (tại ảnh đang chọn) ↔ đóng */
+  toggle() {
+    if (this.open) this.hide();
+    else this.show();
+  }
+
+  /** @deprecated Dùng hide() — giữ tạm cho code cũ, sẽ bỏ */
+  close() {
+    this.hide();
   }
 
   /** Chuyển tới ảnh i (loop → vòng lại) */
@@ -353,7 +366,7 @@ class HuiLightbox extends HuiElement {
         trapFocus: true,
         lockScroll: true,
         restoreFocus: true,
-        onEscape: () => this.close(),
+        onEscape: () => this.hide(),
       });
     }
     const dlg = this._dialog;
@@ -365,14 +378,17 @@ class HuiLightbox extends HuiElement {
     this._display(0);
 
     if (this._noMotion) return;
-    animateIn(this._mask, 'fade');
+    const mask = animateIn(this._mask, 'fade');
     this._img.style.opacity = '0';
     const ready = await this._imageReady();
     if (token !== this._token) return;
     this._img.style.opacity = '';
     const frames = ready && this._origin && this.index === this._originIndex ? this._flipFrames(this._origin) : null;
-    if (frames) this._img.animate(frames, { duration: 320, easing: EASE });
-    else animateIn(this._img, 'zoom');
+    const img = frames
+      ? this._img.animate(frames, { duration: 320, easing: EASE }).finished.catch(() => {})
+      : animateIn(this._img, 'zoom');
+    // Chờ hiệu ứng xong (cho hui-after-open); tab nền không vẽ frame → tối đa 600ms
+    await Promise.race([Promise.all([mask, img]), new Promise((r) => setTimeout(r, 600))]);
   }
 
   async _hide() {
@@ -646,7 +662,7 @@ class HuiLightbox extends HuiElement {
       } else this._applyView(true); // chưa đủ xa → trượt về giữa
     } else if (g.onBackdrop && e.type === 'pointerup') {
       // Chạm vùng trống quanh ảnh → đóng
-      this.close();
+      this.hide();
     }
   }
 

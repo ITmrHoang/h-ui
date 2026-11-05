@@ -71,7 +71,9 @@ Nút đứng riêng được cố định ở góc (\`position\`, \`offset\`). T
 | Tên | Mô tả |
 |-----|-------|
 | \`show()\` / \`hide()\` / \`toggle()\` | Mở / đóng / đảo |
-| \`open-change\` | Mở/đóng do người dùng hoặc method. \`detail: { open }\` |
+| \`hui-open\` / \`hui-close\` | Bắt đầu mở / đóng (người dùng, method hay gán \`open\`) |
+| \`hui-after-open\` / \`hui-after-close\` | Đã mở / đóng xong (hết animation) |
+| \`open-change\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\`. \`detail: { open }\` |
 
 ### Slots
 | Thẻ | Slot | Mô tả |

@@ -11,7 +11,7 @@ const dialogOf = (el) => el.shadowRoot.querySelector('dialog');
 
 /** Đóng & chờ hết animation */
 async function closeAndWait(el) {
-  el.close();
+  el.hide();
   await waitFor(() => expect(dialogOf(el).open).toBe(false));
 }
 
@@ -42,12 +42,12 @@ lightbox.open([{ src, alt, caption }, 'b.jpg'], 0, { origin: thumbEl, loop: true
 | \`label\` | locale | Nhãn ARIA hộp thoại |
 | \`no-animation\` | — | Tắt hiệu ứng |
 
-**Methods:** \`show(index, {origin})\`, \`close()\`, \`next()\`, \`prev()\`, \`goTo(i)\`, \`zoomIn()\`, \`zoomOut()\`, \`zoomTo(scale, point)\`, \`resetZoom()\`, \`rotate()\`
+**Methods:** \`show(index, {origin})\`, \`hide()\`, \`toggle()\` (\`close()\` cũ: deprecated, dùng \`hide()\`), \`next()\`, \`prev()\`, \`goTo(i)\`, \`zoomIn()\`, \`zoomOut()\`, \`zoomTo(scale, point)\`, \`resetZoom()\`, \`rotate()\`
 · **Chỉ đọc:** \`currentItem\`, \`count\`, \`zoom\`, \`imageElement\`
 
 **Hàm:** \`lightbox.open(items, index, { origin, loop, noDownload, zoomMax })\` → thẻ dùng chung · \`lightbox.close()\` · \`lightbox.element\`
 
-**Events:** \`hui-open\` {index} · \`hui-close\` {index} · \`hui-change\` {index, item}
+**Events:** \`hui-open\` / \`hui-after-open\` {index} · \`hui-close\` / \`hui-after-close\` {index} · \`hui-change\` {index, item}
 
 **Parts:** dialog, mask, stage, image, toolbar, counter, zoom-in, zoom-out, rotate, download, close, prev, next, caption, loader, error
 · **States:** \`:state(open)\`, \`:state(zoomed)\`, \`:state(loading)\`

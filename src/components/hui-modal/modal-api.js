@@ -74,7 +74,7 @@ function openConfirm(type, opts = {}) {
     }
     el.confirmLoading = false;
     settle(true);
-    el.close();
+    el.hide();
   });
 
   el.addEventListener('hui-cancel', (e) => {
@@ -95,9 +95,9 @@ function openConfirm(type, opts = {}) {
 
   active.add(el);
   document.body.appendChild(el);
-  el.open();
+  el.show();
 
-  promise.close = () => el.close();
+  promise.close = () => el.hide();
   return promise;
 }
 
@@ -112,7 +112,7 @@ export const modal = {
   warning: (opts) => openConfirm('warning', opts),
   /** Đóng mọi hộp đang mở bằng hàm (resolve false) */
   destroyAll() {
-    active.forEach((el) => el.close());
+    active.forEach((el) => el.hide());
   },
 };
 

@@ -72,7 +72,11 @@ Chọn trong cột là **tạm** (ô nhập đổi theo); "Đồng ý" / Enter /
 |-------|--------|-------|
 | \`input\` / \`change\` | \`{ value }\` | Giá trị đổi do người dùng |
 | \`clear\` | — | Bấm nút xóa |
-| \`hui-open\` / \`hui-close\` | — | Mở / đóng popup |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Popup bắt đầu mở / đóng |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+
+### Methods
+\`show()\` / \`hide()\` / \`toggle()\` — mở / đóng popup (= gán \`open\`).
 
 ### Bàn phím
 | Phím | Hành động |

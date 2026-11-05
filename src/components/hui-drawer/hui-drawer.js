@@ -26,7 +26,8 @@ const hasNodes = (slot) => slot.assignedNodes({ flatten: true }).some(
 );
 
 /**
- * @fires hui-open - Drawer vừa mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-open - Drawer bắt đầu mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
  * @fires hui-close - Drawer bắt đầu đóng
  * @fires hui-after-close - Đã đóng xong (hết animation)
  * @fires hui-cancel - Người dùng muốn đóng (nút X / Esc / click mask). Cancelable: preventDefault() để giữ mở
@@ -188,12 +189,13 @@ class HuiDrawer extends HuiElement {
 
     if (changed.has('open')) {
       const first = !this._mounted;
+      let done = null;
       if (this.open) {
         // Lần đầu đã có sẵn open: đợi 1 frame cho slot/layout ổn định
         if (first) requestAnimationFrame(() => this.open && this._show());
-        else this._show();
-      } else if (!first) this._hide();
-      if (!first) this.emit(this.open ? 'hui-open' : 'hui-close');
+        else done = this._show();
+      } else if (!first) done = this._hide();
+      if (!first) this._emitOpenEvents(this.open, done);
     }
   }
 
@@ -282,8 +284,10 @@ class HuiDrawer extends HuiElement {
     this._showDialog();
     this.setState('open', true);
     this._panel.getAnimations?.().forEach((a) => a.cancel());
-    if (modal) animateIn(this._mask, 'fade');
-    animateIn(this._panel, MOTION[this._placement] || 'move-right');
+    return Promise.all([
+      modal ? animateIn(this._mask, 'fade') : null,
+      animateIn(this._panel, MOTION[this._placement] || 'move-right'),
+    ]);
   }
 
   async _hide() {
@@ -305,7 +309,6 @@ class HuiDrawer extends HuiElement {
     // Đóng overlay SAU khi dialog đóng: trang hết inert nên trả focus được
     this._handle?.close();
     this._handle = null;
-    this.emit('hui-after-close');
   }
 
   /** Bị tháo khỏi trang khi đang mở: trả lại overlay stack, khóa cuộn, trạng thái push */

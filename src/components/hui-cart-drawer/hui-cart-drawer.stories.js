@@ -81,7 +81,8 @@ trạng thái trống (\`hui-empty\`). Gán \`data\` một lần, sau đó compo
 | \`hui-cart-change\` | \`{ items, total, count, reason, item }\` | \`reason\`: \`qty\` \\| \`remove\` \\| \`undo\` \\| \`add\` \\| \`clear\` |
 | \`hui-checkout\` | \`{ items, total, count }\` | Bấm thanh toán — cancelable (chặn \`checkout-href\`) |
 | \`hui-continue\` | — | Bấm "Tiếp tục mua sắm" (drawer tự đóng) |
-| \`hui-open\` / \`hui-close\` | — | Từ \`hui-drawer\` bên trong |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng — từ \`hui-drawer\` bên trong |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong |
 
 ### Slots
 | Slot | Mô tả |

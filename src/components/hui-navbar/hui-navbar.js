@@ -30,7 +30,11 @@ function tx(key) {
 const SCROLL_THRESHOLD = 8;
 
 /**
- * @fires open-change - Panel mobile mở/đóng do người dùng. detail: { open }
+ * @fires hui-open - Panel mobile bắt đầu mở (người dùng, method hay gán open; không phát khi render lần đầu)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Panel mobile bắt đầu đóng (kể cả khi tự đóng vì chuyển sang desktop)
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Panel mobile mở/đóng do người dùng. detail: { open }
  * @slot logo - Logo / tên thương hiệu (bên trái)
  * @slot - Link điều hướng hoặc một <hui-menu mode="horizontal"> (mobile: tự chuyển mode inline)
  * @slot actions - Nút hành động bên phải (luôn hiện, kể cả mobile)
@@ -125,7 +129,11 @@ class HuiNavbar extends HuiElement {
 
   updated(changed) {
     if (changed.has('breakpoint')) this._checkMobile();
-    if (changed.has('open')) this._applyOpen(this.open && this._mobile);
+    if (changed.has('open')) {
+      // Lần render đầu: chỉ áp trạng thái, không phát sự kiện
+      this._applyOpen(this.open && this._mobile, !this._openApplied);
+      this._openApplied = true;
+    }
     if (changed.has('locale')) this._nav.setAttribute('aria-label', tx('navbar.label'));
     this._syncClasses();
   }
@@ -170,6 +178,7 @@ class HuiNavbar extends HuiElement {
     if (!mobile && this._panelShown) {
       // Về desktop: đóng panel ngay, không animation
       this._closeImmediately();
+      this._emitOpenEvents(false);
       if (this.open) {
         this.open = false;
         this.emit('open-change', { open: false });
@@ -197,6 +206,25 @@ class HuiNavbar extends HuiElement {
     }
   }
 
+  // =====================================================
+  // PUBLIC API — quy ước overlay: property open + show() / hide() / toggle()
+  // =====================================================
+
+  /** Mở panel mobile (chỉ có tác dụng khi đang ở dạng mobile) */
+  show() {
+    this._setOpen(true);
+  }
+
+  /** Đóng panel mobile */
+  hide() {
+    this._setOpen(false);
+  }
+
+  /** Mở ↔ đóng panel mobile */
+  toggle() {
+    this._setOpen(!this._panelShown);
+  }
+
   /** Mở/đóng do người dùng → phản chiếu attribute open + phát open-change */
   _setOpen(open) {
     if (open && !this._mobile) return;
@@ -206,7 +234,8 @@ class HuiNavbar extends HuiElement {
     this.emit('open-change', { open });
   }
 
-  _applyOpen(open) {
+  /** Áp trạng thái lên DOM + phát hui-open / hui-close… (`initial` = lúc render đầu: không phát) */
+  _applyOpen(open, initial = false) {
     if (open === this._panelShown) return;
     this._panelShown = open;
     const token = ++this._token;
@@ -215,7 +244,8 @@ class HuiNavbar extends HuiElement {
 
     if (open) {
       panel.getAnimations?.().forEach((a) => a.cancel());
-      animateIn(panel, 'slide-down');
+      const shown = animateIn(panel, 'slide-down');
+      if (!initial) this._emitOpenEvents(true, shown);
       this._overlay = openOverlay({
         element: panel,
         ignore: [this._toggle],
@@ -233,11 +263,12 @@ class HuiNavbar extends HuiElement {
     this._overlay = null;
     // Giữ nav hiển thị trong lúc chạy animation đóng
     panel.hidden = false;
-    animateOut(panel, 'slide-down').then(() => {
+    const hidden = animateOut(panel, 'slide-down').then(() => {
       if (token !== this._token) return;
       panel.getAnimations?.().forEach((a) => a.cancel());
       this._syncClasses();
     });
+    if (!initial) this._emitOpenEvents(false, hidden);
   }
 
   _closeImmediately() {

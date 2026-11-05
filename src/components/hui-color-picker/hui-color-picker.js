@@ -69,8 +69,10 @@ const sameColor = (a, b) => Boolean(a && b) && rgbToHex(a) === rgbToHex(b);
  * Ô chọn màu.
  * @fires input - Màu đổi khi đang kéo / gõ phím (gom theo frame). detail: { value, color: { r, g, b, a } }
  * @fires change - Màu đã chốt (thả chuột, phím, ô nhập, preset, EyeDropper, xóa). detail: { value, color }
- * @fires hui-open - Bảng chọn mở
- * @fires hui-close - Bảng chọn đóng
+ * @fires hui-open - Bảng chọn bắt đầu mở
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bảng chọn bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
  * @fires clear - Bấm "Xóa màu"
  * @csspart base - Khung ngoài
  * @csspart trigger - Nút mở bảng chọn
@@ -738,7 +740,9 @@ export class HuiColorPicker extends HuiFormElement {
     this._popup.getAnimations?.().forEach((a) => a.cancel());
     showFloating(this._popup, '--hui-z-popover');
     this._stopAuto ||= autoUpdate(this._trigger, this._popup, () => this._position());
-    if (!this.noAnimation && !animationsDisabled()) animateIn(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down');
+    const shown = !this.noAnimation && !animationsDisabled()
+      ? animateIn(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down')
+      : null;
     this._overlay = openOverlay({
       element: this._popup,
       ignore: [this._trigger],
@@ -749,7 +753,7 @@ export class HuiColorPicker extends HuiFormElement {
     });
     this._trigger.setAttribute('aria-expanded', 'true');
     this.setState('open', true);
-    this.emit('hui-open');
+    this._emitOpenEvents(true, shown);
   }
 
   _closePopup(immediate = false) {
@@ -768,10 +772,11 @@ export class HuiColorPicker extends HuiFormElement {
       hideFloating(this._popup);
       this._popup.getAnimations?.().forEach((a) => a.cancel());
     };
+    let hidden = null;
     if (immediate || this.noAnimation || animationsDisabled()) done();
-    else animateOut(this._popup, 'fade').then(done);
+    else hidden = animateOut(this._popup, 'fade').then(done);
     this.markInteracted();
-    this.emit('hui-close');
+    this._emitOpenEvents(false, hidden);
   }
 
   _position() {
@@ -890,6 +895,11 @@ export class HuiColorPicker extends HuiFormElement {
   /** Đóng bảng chọn */
   hide() {
     this.open = false;
+  }
+
+  /** Mở ↔ đóng bảng chọn */
+  toggle() {
+    this.open = !this.open;
   }
 
   focus(options) {

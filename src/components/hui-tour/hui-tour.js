@@ -54,7 +54,10 @@ function fill(el, value) {
 /**
  * @fires hui-change - Chuyển bước do người dùng / method (không phát khi đổi attribute current từ ngoài). detail: { current, previous }
  * @fires hui-finish - Bấm nút Hoàn thành ở bước cuối. detail: { current }
- * @fires hui-close - Đóng do người dùng (× / Esc / Bỏ qua / Hoàn thành / close()). detail: { current, reason: 'close' | 'escape' | 'skip' | 'finish' }
+ * @fires hui-open - Tour bắt đầu mở (start() / show() / gán open; không phát khi render lần đầu với sẵn open). detail: { current }
+ * @fires hui-after-open - Đã mở xong (hết animation). detail: { current }
+ * @fires hui-close - Tour bắt đầu đóng. detail: { current, reason: 'close' (hide() / gán open = false) | 'escape' | 'skip' | 'finish' }
+ * @fires hui-after-close - Đã đóng xong (hết animation). detail: như hui-close
  * @csspart mask - Lớp phủ toàn màn hình
  * @csspart spotlight - Ô sáng quanh phần tử đích
  * @csspart panel - Khung nội dung (role="dialog")
@@ -179,9 +182,26 @@ class HuiTour extends HuiElement {
     else this.current = this._clamp(index);
   }
 
-  /** Đóng tour (phát hui-close reason 'close') */
+  /** Mở tour tại bước `current` (= `tour.open = true`; start(i) để mở tại bước i) */
+  show() {
+    this.open = true;
+  }
+
+  /** Đóng tour (hui-close reason 'close') */
+  hide() {
+    if (this._shown) this._dismiss('close');
+    else this.open = false;
+  }
+
+  /** Mở ↔ đóng */
+  toggle() {
+    if (this.open) this.hide();
+    else this.show();
+  }
+
+  /** @deprecated Dùng hide() — giữ tạm cho code cũ, sẽ bỏ */
   close() {
-    this._dismiss('close');
+    this.hide();
   }
 
   /** Tính lại vị trí (vd: sau khi layout trang đổi mà không có sự kiện cuộn / resize) */
@@ -229,7 +249,7 @@ class HuiTour extends HuiElement {
   connectedCallback() {
     super.connectedCallback();
     this.listen(document, 'keydown', (e) => this._onKeydown(e));
-    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open));
+    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open, true));
   }
 
   disconnectedCallback() {
@@ -240,7 +260,7 @@ class HuiTour extends HuiElement {
   updated(changed) {
     if (changed.has('open')) {
       // Lần đầu: đợi 1 frame để trang (và phần tử đích) dựng xong rồi mới đo
-      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open));
+      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open, true));
       else this._applyOpen(this.open);
     }
     if (!this._shown) return;
@@ -276,7 +296,8 @@ class HuiTour extends HuiElement {
     return !this.noAnimation && !animationsDisabled();
   }
 
-  _applyOpen(open) {
+  /** Áp trạng thái lên DOM + phát hui-open / hui-close… (`initial` = lúc render đầu: không phát) */
+  _applyOpen(open, initial = false) {
     if (open && (!this.isConnected || !this._steps.length)) open = false;
     if (open === this._shown) return;
     this._shown = open;
@@ -293,11 +314,18 @@ class HuiTour extends HuiElement {
       this._panel.classList.add('panel--waiting');
       showFloating(this._mask, '--hui-z-modal');
       showFloating(this._panel, '--hui-z-popover');
-      if (this._animated()) animateIn(this._mask, 'fade');
+      const shown = this._animated() ? animateIn(this._mask, 'fade') : null;
       this._activate(this._active, { animate: false, first: true });
+      if (!initial) this._emitOpenEvents(true, shown, { current: this._active });
       return;
     }
 
+    // Lấy bước hiện tại TRƯỚC khi _teardown xóa _active
+    const detail = {
+      current: this._active < 0 ? this._clamp(this.current) : this._active,
+      reason: this._closeReason || 'close',
+    };
+    this._closeReason = null;
     this._teardown(false);
     const done = () => {
       if (token !== this._token) return;
@@ -305,8 +333,10 @@ class HuiTour extends HuiElement {
       hideFloating(this._panel);
       for (const el of [this._mask, this._panel]) el.getAnimations?.().forEach((a) => a.cancel());
     };
-    if (this._animated()) Promise.all([animateOut(this._mask, 'fade'), animateOut(this._panel, 'fade')]).then(done);
+    let hidden = null;
+    if (this._animated()) hidden = Promise.all([animateOut(this._mask, 'fade'), animateOut(this._panel, 'fade')]).then(done);
     else done();
+    if (!initial) this._emitOpenEvents(false, hidden, detail);
   }
 
   /** Gỡ theo dõi + trả focus (overlay.close); `immediate` = ẩn ngay (element bị tháo khỏi trang) */
@@ -328,13 +358,12 @@ class HuiTour extends HuiElement {
     }
   }
 
-  /** Người dùng đóng: phát hui-close rồi đóng */
+  /** Người dùng / method đóng: _applyOpen phát hui-close kèm `reason` */
   _dismiss(reason) {
     if (!this._shown) return;
-    const current = this._active < 0 ? this._clamp(this.current) : this._active;
+    this._closeReason = reason;
     this.open = false;
     this._applyOpen(false);
-    this.emit('hui-close', { current, reason });
   }
 
   _finish() {

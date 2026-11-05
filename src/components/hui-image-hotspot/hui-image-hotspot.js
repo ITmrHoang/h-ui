@@ -172,6 +172,10 @@ class HuiImageHotspot extends HuiElement {
       if (spot.title) pop.append(createElement('div', { slot: 'title', className: 'ih__pop-title', part: 'spot-title' }, String(spot.title)));
       if (spot.content || spot.href) pop.append(content);
       // Không có nội dung → không mở popover, chấm vẫn hiện tên qua aria-label
+      // Sự kiện mở / đóng của popover bên trong không lọt ra ngoài — thẻ này phát hui-spot-toggle
+      for (const type of ['hui-open', 'hui-after-open', 'hui-close', 'hui-after-close']) {
+        pop.addEventListener(type, (e) => e.stopPropagation());
+      }
       pop.addEventListener('open-change', (e) => {
         e.stopPropagation();
         const open = Boolean(e.detail?.open);

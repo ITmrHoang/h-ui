@@ -527,6 +527,8 @@ export const SortingFiltering = {
     // Lọc 1 lựa chọn (radio) trên cột trạng thái
     const st = await openFilter(el, 'status');
     const group = st.panel.querySelector('hui-radio-group');
+    // hui-radio-group được tải lười (ensureElement) — chạy cả bộ test thì có thể lâu hơn 1s của waitFor
+    await customElements.whenDefined('hui-radio-group');
     await waitFor(() => expect(group.shadowRoot.querySelectorAll('hui-radio').length).toBe(3));
     await userEvent.click(group.shadowRoot.querySelectorAll('hui-radio')[0]);
     await userEvent.click(st.panel.querySelector('.filter-ok'));

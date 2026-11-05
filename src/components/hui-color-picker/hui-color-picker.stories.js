@@ -78,7 +78,8 @@ Methods: \`show()\`, \`hide()\`, \`focus()\`, \`blur()\`.
 |-------|--------|---------|
 | \`input\` | \`{ value, color }\` | Đang kéo (gom theo frame) / mỗi lần màu đổi |
 | \`change\` | \`{ value, color }\` | Thả chuột, phím, chốt ô nhập, chọn preset, EyeDropper, xóa |
-| \`hui-open\` / \`hui-close\` | — | Mở / đóng bảng chọn |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bảng chọn bắt đầu mở / đóng |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
 | \`clear\` | — | Bấm "Xóa màu" |
 
 ### Parts

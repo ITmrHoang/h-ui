@@ -175,7 +175,7 @@ export const Config = {
 /** Message nằm trên Modal — kể cả khi Modal mở sau */
 export const AboveModal = {
   render: () => html`
-    <hui-button @hui-click=${() => document.querySelector('#msg-modal').open()}>Mở Modal</hui-button>
+    <hui-button @hui-click=${() => document.querySelector('#msg-modal').show()}>Mở Modal</hui-button>
     <hui-modal id="msg-modal" title="Modal" @hui-ok=${(e) => { e.preventDefault(); message.success('Message nằm trên Modal'); }}>
       <p>Bấm OK để hiện message (modal giữ nguyên).</p>
     </hui-modal>
@@ -186,7 +186,7 @@ export const AboveModal = {
     message.destroy();
     const modalEl = canvasElement.querySelector('#msg-modal');
     const dialog = modalEl.shadowRoot.querySelector('dialog');
-    modalEl.open();
+    modalEl.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     // Modal tự focus control đầu tiên (nút X) sau 1 frame
     const focusedBefore = modalEl.shadowRoot.querySelector('[part="close"]');
@@ -213,9 +213,9 @@ export const AboveModal = {
     const point = { clientX: x, clientY: y, bubbles: true, composed: true };
     notice.dispatchEvent(new PointerEvent('pointerdown', point));
     await new Promise((r) => setTimeout(r, 100));
-    await expect(modalEl.isOpen).toBe(true);
+    await expect(modalEl.open).toBe(true);
 
-    modalEl.close();
+    modalEl.hide();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
     // Modal đóng → message còn hiển thị chuyển ra <body>, vẫn trên top-layer
     await waitFor(() => expect(container.parentNode).toBe(document.body));
@@ -234,7 +234,7 @@ export const ModalRemovedWhileShowing = {
     message.destroy();
     const modalEl = canvasElement.querySelector('#msg-modal-removed');
     const dialog = modalEl.shadowRoot.querySelector('dialog');
-    modalEl.open();
+    modalEl.show();
     await waitFor(() => expect(dialog.open).toBe(true));
 
     message.info('Còn hiển thị', { duration: 0, key: 'removed' });

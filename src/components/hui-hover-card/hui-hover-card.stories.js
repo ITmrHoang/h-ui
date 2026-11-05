@@ -59,12 +59,14 @@ nên không bị \`overflow: hidden\` cắt.
 | \`no-animation\` | boolean | \`false\` | Tắt hiệu ứng |
 
 ### Methods
-\`show()\`, \`hide()\` — mở / đóng ngay không trễ.
+\`show()\`, \`hide()\`, \`toggle()\` — mở / đóng ngay không trễ.
 
 ### Events
-| Event | Detail |
-|-------|--------|
-| \`hui-open-change\` | \`{ open }\` |
+| Event | Detail | Mô tả |
+|-------|--------|-------|
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng (người dùng, method hay gán \`open\`; không phát khi render lần đầu) |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+| \`hui-open-change\` | \`{ open }\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\` |
 
 ### Slots
 _(default)_ trigger · \`content\` nội dung thẻ

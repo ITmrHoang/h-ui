@@ -53,7 +53,8 @@ Drawer đặt bên trong drawer khác → khi mở, drawer cha lùi vào một �
 ### Events
 | Event | Mô tả |
 |-------|-------|
-| \`hui-open\` | Vừa mở |
+| \`hui-open\` | Bắt đầu mở |
+| \`hui-after-open\` | Đã mở xong (hết animation) |
 | \`hui-close\` | Bắt đầu đóng |
 | \`hui-after-close\` | Đã đóng xong (hết animation) |
 | \`hui-cancel\` | Người dùng muốn đóng (X / Esc / mask). Cancelable: \`preventDefault()\` để giữ mở |

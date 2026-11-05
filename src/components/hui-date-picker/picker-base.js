@@ -284,7 +284,7 @@ export class HuiPickerBase extends HuiFormElement {
     showFloating(this._popup);
     this._stopAutoUpdate ||= autoUpdate(this._selector, this._popup, () => this._position());
     this._afterShow();
-    if (this._animated()) animateIn(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down');
+    const shown = this._animated() ? animateIn(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down') : null;
     this._overlay = openOverlay({
       element: this._popup,
       ignore: [this._selector],
@@ -293,7 +293,7 @@ export class HuiPickerBase extends HuiFormElement {
       onClickOutside: () => this._closePopup({ commit: true }),
     });
     this._syncClasses();
-    this.emit('hui-open');
+    this._emitOpenEvents(true, shown);
     if (focusPanel) this._focusPanel();
   }
 
@@ -322,9 +322,10 @@ export class HuiPickerBase extends HuiFormElement {
       hideFloating(this._popup);
       this._popup.getAnimations?.().forEach((a) => a.cancel());
     };
-    if (this._animated()) animateOut(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down').then(done);
+    let hidden = null;
+    if (this._animated()) hidden = animateOut(this._popup, this._side === 'top' ? 'slide-up' : 'slide-down').then(done);
     else done();
-    this.emit('hui-close');
+    this._emitOpenEvents(false, hidden);
   }
 
   _position() {
@@ -377,6 +378,25 @@ export class HuiPickerBase extends HuiFormElement {
     this.emit('input', detail);
     this.emit('change', detail);
     return true;
+  }
+
+  // =====================================================
+  // PUBLIC API — quy ước overlay: property open + show() / hide() / toggle()
+  // =====================================================
+
+  /** Mở popup (= `picker.open = true`) */
+  show() {
+    this.open = true;
+  }
+
+  /** Đóng popup, bỏ giá trị đang chọn dở (= `picker.open = false`) */
+  hide() {
+    this.open = false;
+  }
+
+  /** Mở ↔ đóng popup */
+  toggle() {
+    this.open = !this.open;
   }
 
   validationAnchor() {

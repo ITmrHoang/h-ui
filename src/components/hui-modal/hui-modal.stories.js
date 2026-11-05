@@ -71,12 +71,15 @@ Tab chạy vòng trong modal (xuyên Shadow DOM), khóa cuộn trang, đóng xon
 ### Methods
 | Method | Mô tả |
 |--------|-------|
-| \`show()\` / \`open()\` | Mở modal từ JS (\`open()\` giữ cho code cũ) |
-| \`hide()\` / \`close()\` | Đóng modal từ JS (không phát \`hui-cancel\`) |
-| \`isOpen\` | (getter) Modal đang mở hay không |
+| \`show()\` | Mở modal (= \`modal.open = true\`) |
+| \`hide()\` | Đóng modal, không phát \`hui-cancel\` (= \`modal.open = false\`); \`close()\` là tên khác |
+| \`toggle()\` | Mở ↔ đóng |
 
-Gán property cũng được: \`modal.open = true / false\` (Vue \`:open="visible"\`, React 19 \`open={visible}\`).
-Đọc trạng thái bằng \`isOpen\` — \`modal.open\` trả về method \`open()\` để code cũ \`modal.open()\` không vỡ.
+Trạng thái là property \`open\` (boolean): đọc / gán \`modal.open\` — Vue \`:open="visible"\` + \`@hui-close="visible = false"\`,
+React 19 \`open={visible}\`. Cùng quy ước với hui-drawer, hui-popover, hui-dropdown…
+
+> **Đổi từ bản trước 0.5.2:** không còn method \`open()\` (trùng tên property) → dùng \`show()\`; \`close()\` → \`hide()\`
+> (\`close()\` vẫn chạy); \`isOpen\` → \`open\` (\`isOpen\` vẫn đọc được).
 
 ### Gọi bằng hàm — \`modal.confirm | info | success | error | warning(options)\`
 \`\`\`js
@@ -174,9 +177,9 @@ Chỉ \`confirm\` có nút Hủy; nút OK được focus sẵn.
 
 // === HELPER: Hàm tạo nút mở modal bằng JS ===
 const openModal = (id) => {
-  // Tìm modal theo id rồi gọi method .open()
+  // Tìm modal theo id rồi gọi show()
   const modal = document.querySelector(`#${id}`);
-  if (modal) modal.open();
+  if (modal) modal.show();
 };
 
 // === STORIES ===
@@ -203,7 +206,7 @@ export const Default = {
       <p>Nhấn <strong>ESC</strong>, nút <strong>✕</strong>, hoặc click vào vùng tối bên ngoài để đóng.</p>
       <div slot="footer">
         <hui-button variant="ghost" @hui-click=${() => {
-          document.querySelector('#modal-default')?.close();
+          document.querySelector('#modal-default')?.hide();
         }}>Hủy</hui-button>
         <hui-button variant="primary">Xác nhận</hui-button>
       </div>
@@ -231,7 +234,7 @@ export const Small = {
       <p>Bạn có chắc chắn muốn xóa item này? Hành động này không thể hoàn tác.</p>
       <div slot="footer">
         <hui-button variant="ghost" @hui-click=${() => {
-          document.querySelector('#modal-sm')?.close();
+          document.querySelector('#modal-sm')?.hide();
         }}>Hủy</hui-button>
         <hui-button variant="danger">Xóa</hui-button>
       </div>
@@ -259,7 +262,7 @@ export const Large = {
       </div>
       <div slot="footer">
         <hui-button variant="ghost" @hui-click=${() => {
-          document.querySelector('#modal-lg')?.close();
+          document.querySelector('#modal-lg')?.hide();
         }}>Đóng</hui-button>
         <hui-button variant="primary">Lưu thay đổi</hui-button>
       </div>
@@ -280,7 +283,7 @@ export const FullScreen = {
       <p>Modal này chiếm gần toàn bộ màn hình. Phù hợp cho editor, preview, hoặc dashboard nội bộ.</p>
       <div slot="footer">
         <hui-button variant="ghost" @hui-click=${() => {
-          document.querySelector('#modal-full')?.close();
+          document.querySelector('#modal-full')?.hide();
         }}>Đóng</hui-button>
       </div>
     </hui-modal>
@@ -301,7 +304,7 @@ export const NotClosable = {
       <p>Modal này <strong>không thể đóng</strong> bằng ESC hay click overlay. Bạn phải nhấn nút bên dưới.</p>
       <div slot="footer">
         <hui-button variant="primary" @hui-click=${() => {
-          document.querySelector('#modal-lock')?.close();
+          document.querySelector('#modal-lock')?.hide();
         }}>Tôi đã hiểu</hui-button>
       </div>
     </hui-modal>
@@ -349,7 +352,7 @@ export const DefaultFooter = {
       @hui-ok=${(e) => {
         e.preventDefault();
         const modal = e.currentTarget;
-        setTimeout(() => modal.close(), 1000);
+        setTimeout(() => modal.hide(), 1000);
       }}
     >
       <p>Bấm <strong>Lưu</strong> (đóng sau 1 giây) hoặc <strong>Hủy</strong>.</p>
@@ -361,17 +364,17 @@ export const DefaultFooter = {
     const dialog = modal.shadowRoot.querySelector('dialog');
     const wait = (fn) => waitFor(() => expect(fn()).toBe(true), { timeout: 2000 });
 
-    modal.open();
+    modal.show();
     await wait(() => dialog.open);
     await expect(modal.shadowRoot.querySelector('[part="ok-button"]').textContent).toBe('Lưu');
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await wait(() => !modal.isOpen && !dialog.open);
+    await wait(() => !modal.open && !dialog.open);
 
-    modal.open();
+    modal.show();
     await wait(() => dialog.open);
     modal.shadowRoot.querySelector('.wrap').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
-    await wait(() => !modal.isOpen && !dialog.open);
+    await wait(() => !modal.open && !dialog.open);
   },
 };
 
@@ -428,11 +431,11 @@ export const CenteredAndWidth = {
 
     // mask-closable="false" → click mask không đóng; Esc vẫn đóng
     const dialog = el.shadowRoot.querySelector('dialog');
-    el.open();
+    el.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     el.shadowRoot.querySelector('.wrap').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
     await new Promise((r) => setTimeout(r, 100));
-    await expect(el.isOpen).toBe(true);
+    await expect(el.open).toBe(true);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   },
@@ -440,7 +443,7 @@ export const CenteredAndWidth = {
 
 /**
  * Mở / đóng bằng property — `modal.open = true / false` (cách Vue `:open="visible"` / React 19 `open={visible}` gán),
- * `show()` / `hide()` và `open()` / `close()` cũ vẫn dùng được. Đọc trạng thái bằng `isOpen`.
+ * hoặc `show()` / `hide()` / `toggle()`. Đọc trạng thái bằng chính `modal.open` (boolean).
  */
 export const OpenByProperty = {
   render: () => html`
@@ -462,22 +465,21 @@ export const OpenByProperty = {
 
     el.open = true;
     await waitFor(() => expect(dialog.open).toBe(true));
-    await expect(el.isOpen).toBe(true);
+    await expect(el.open).toBe(true); // boolean thật
     await expect(el.hasAttribute('open')).toBe(true);
-    await expect(typeof el.open).toBe('function'); // method open() không bị ghi đè
 
     el.open = false;
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
-    await expect(el.isOpen).toBe(false);
+    await expect(el.open).toBe(false);
 
     el.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     el.hide();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
 
-    el.open(); // API cũ
+    el.toggle();
     await waitFor(() => expect(dialog.open).toBe(true));
-    el.close();
+    el.toggle();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   },
 };
@@ -530,7 +532,7 @@ export const ConfirmApi = {
     await waitFor(() => expect(okBtn.loading).toBe(true));
     // Đang loading → Esc không đóng
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await expect(el.isOpen).toBe(true);
+    await expect(el.open).toBe(true);
 
     resolveOk();
     await expect(await p).toBe(true);
@@ -571,7 +573,7 @@ export const DestroyOnClose = {
     const dialog = el.shadowRoot.querySelector('dialog');
     await expect(el.querySelector('.destroy-input')).toBe(null);
 
-    el.open();
+    el.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     const input = el.querySelector('.destroy-input');
     await expect(input).toBeTruthy();
@@ -579,14 +581,14 @@ export const DestroyOnClose = {
 
     let afterClose = 0;
     el.addEventListener('hui-after-close', () => afterClose++);
-    el.close();
+    el.hide();
     await waitFor(() => expect(afterClose).toBe(1), { timeout: 2000 });
     await expect(el.querySelector('.destroy-input')).toBe(null);
 
-    el.open();
+    el.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     await expect(el.querySelector('.destroy-input').value).toBe('');
-    el.close();
+    el.hide();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   },
 };
@@ -606,21 +608,21 @@ export const ReopenImmediately = {
   play: async ({ canvasElement }) => {
     const el = canvasElement.querySelector('#modal-reopen');
     const dialog = el.shadowRoot.querySelector('dialog');
-    el.open();
+    el.show();
     await waitFor(() => expect(dialog.open).toBe(true));
 
     // Mở lại ngay khi vừa đóng xong (dialog.close() đã chạy, sự kiện 'close' native còn trong hàng đợi)
     const reopened = new Promise((resolve) => {
-      el.addEventListener('hui-after-close', () => { el.open(); resolve(); }, { once: true });
+      el.addEventListener('hui-after-close', () => { el.show(); resolve(); }, { once: true });
     });
-    el.close();
+    el.hide();
     await reopened;
     // Chờ qua vài task để sự kiện 'close' trễ chắc chắn đã tới
     await new Promise((r) => setTimeout(r, 100));
-    await expect(el.isOpen).toBe(true);
+    await expect(el.open).toBe(true);
     await expect(dialog.open).toBe(true);
 
-    el.close();
+    el.hide();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   },
 };

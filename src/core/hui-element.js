@@ -128,8 +128,8 @@ export class HuiElement extends HTMLElement {
     for (const [name, opts] of map) {
       if (opts.attribute) this._attributeToProp.set(opts.attribute, name);
 
-      const own = Object.getOwnPropertyDescriptor(this.prototype, name);
-      if (!own) {
+      // Lớp con tự viết getter/setter riêng thì không ghi đè
+      if (!Object.prototype.hasOwnProperty.call(this.prototype, name)) {
         Object.defineProperty(this.prototype, name, {
           configurable: true,
           enumerable: true,
@@ -140,25 +140,35 @@ export class HuiElement extends HTMLElement {
             this._setProp(name, value);
           },
         });
-      } else if (typeof own.value === 'function') {
-        // Property trùng tên method (vd: hui-modal có property `open` và method `open()`):
-        // get trả về chính method → `modal.open()` vẫn gọi được; set đi qua _setProp → `modal.open = true`
-        // (Vue `:open`, React 19, gán tay) mở được modal thay vì ghi đè mất method. Đọc trạng thái: `isOpen`.
-        const method = own.value;
-        Object.defineProperty(this.prototype, name, {
-          configurable: true,
-          enumerable: false,
-          get() {
-            return method;
-          },
-          set(value) {
-            this._setProp(name, value);
-          },
-        });
       }
-      // Còn lại: lớp con tự viết getter/setter riêng → không ghi đè
+    }
+
+    // Property trùng tên method → `el.open = true` (Vue :open, React 19) ghi đè mất method hoặc method che mất
+    // property. Báo ngay cho người viết component; test/naming-conflicts.test.js chặn mọi component của thư viện.
+    for (const name of this._methodConflicts()) {
+      console.warn(`[H-UI] ${this.name}: property "${name}" trùng tên method ${name}() — đổi tên method `
+        + '(quy ước overlay: property open + show() / hide() / toggle()).');
     }
     return [...this._attributeToProp.keys()];
+  }
+
+  /**
+   * Tên property (trong `static properties`) trùng với một method trên chuỗi prototype — của chính lớp,
+   * lớp cha hay có sẵn của HTMLElement (click, remove, ...). Đúng ra phải luôn rỗng.
+   * @returns {string[]}
+   */
+  static _methodConflicts() {
+    const out = [];
+    for (const name of this._getPropertyMap().keys()) {
+      for (let proto = this.prototype; proto && proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
+        const desc = Object.getOwnPropertyDescriptor(proto, name);
+        if (desc && typeof desc.value === 'function') {
+          out.push(name);
+          break;
+        }
+      }
+    }
+    return out;
   }
 
   constructor() {
@@ -370,9 +380,28 @@ export class HuiElement extends HTMLElement {
     }
   }
 
-  /** Phát sự kiện (bubbles + composed để xuyên qua Shadow DOM) */
+  /** Phát sự kiện (bubbles + composed để xuyên qua Shadow DOM). `detail` luôn là object (bỏ trống / null → {}) */
   emit(name, detail = null, options = {}) {
-    return emitEvent(this, name, detail, options);
+    return emitEvent(this, name, detail ?? {}, options);
+  }
+
+  /**
+   * Overlay (property `open`): phát sự kiện mở / đóng theo quy ước chung —
+   * `hui-open` / `hui-close` ngay khi bắt đầu, `hui-after-open` / `hui-after-close` khi `done` xong
+   * (Promise của hiệu ứng; bỏ trống = xong ngay). Đã mở / đóng tiếp trước khi `done` xong → bỏ sự kiện "after".
+   * Không nổi bọt (giống `close` của <dialog>, `toggle` của Popover API): tooltip / dropdown nằm trong modal đóng
+   * thì `@hui-close` của modal không bị gọi nhầm. Vẫn composed → thẻ bọc overlay trong shadow root (cart-drawer,
+   * popconfirm…) vẫn nhận được trên chính nó.
+   * @param {boolean} open
+   * @param {Promise<any>|null} [done]
+   * @param {object} [detail]
+   */
+  _emitOpenEvents(open, done = null, detail = {}) {
+    const seq = (this._openSeq = (this._openSeq ?? 0) + 1);
+    this.emit(open ? 'hui-open' : 'hui-close', detail, { bubbles: false });
+    Promise.resolve(done).catch(() => {}).then(() => {
+      if (seq === this._openSeq) this.emit(open ? 'hui-after-open' : 'hui-after-close', detail, { bubbles: false });
+    });
   }
 
   /**

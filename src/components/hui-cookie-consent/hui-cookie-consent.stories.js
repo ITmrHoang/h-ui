@@ -40,7 +40,7 @@ export default {
 
 \`\`\`html
 <hui-cookie-consent position="bottom-right" policy-href="/chinh-sach-cookie"></hui-cookie-consent>
-<a href="#" onclick="document.querySelector('hui-cookie-consent').open(); return false">Cài đặt cookie</a>
+<a href="#" onclick="document.querySelector('hui-cookie-consent').show(); return false">Cài đặt cookie</a>
 <script type="module">
   import { readConsent } from '@itmrhoang/h-ui/hui-cookie-consent';
   if (readConsent()?.analytics) loadAnalytics();
@@ -59,24 +59,28 @@ export default {
 | \`policy-href\` | string | — | Link chính sách cookie |
 | \`consent-version\` | string | — | Đổi phiên bản → hỏi lại người đã chọn |
 | \`hide-reject\` / \`hide-customize\` | boolean | \`false\` | Ẩn nút Từ chối / Tùy chỉnh |
+| \`open\` | boolean | \`false\` | Banner đang hiện. Gán để hiện / ẩn (ẩn không lưu lựa chọn); tự bật khi chưa có lựa chọn |
 | \`delay\` | number | \`0\` | Trễ trước khi tự hiện (ms) |
 | \`no-animation\` | boolean | \`false\` | Tắt hiệu ứng trượt |
 
 ### Properties & methods
 | Tên | Mô tả |
 |-----|-------|
-| \`open()\` | Hiện banner + focus nút đầu tiên (trả focus về chỗ cũ sau khi chọn) |
+| \`show()\` | Hiện banner + focus nút đầu tiên (trả focus về chỗ cũ sau khi chọn). Trước 0.5.2 tên là \`open()\` |
+| \`hide()\` / \`toggle()\` | Ẩn banner (không lưu lựa chọn) / hiện ↔ ẩn |
 | \`reset()\` | Xóa lựa chọn đã lưu rồi hiện lại |
 | \`openPreferences()\` | Mở hộp tùy chỉnh |
 | \`acceptAll()\` / \`rejectAll()\` | Chọn bằng JS |
 | \`consent\` | \`{ id: boolean }\` đã lưu hoặc \`null\` |
-| \`isOpen\` | Banner đang hiện |
+| \`open\` | Banner đang hiện (\`isOpen\` cũ: deprecated) |
 | \`readConsent(key?)\` | Hàm export: đọc lựa chọn đã lưu không cần thẻ |
 
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
 | \`hui-consent\` | \`{ categories, accepted, action }\` | \`action\`: \`accept-all\` / \`reject-all\` / \`custom\` |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Banner bắt đầu hiện (kể cả tự hiện) / ẩn |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Banner đã hiện / ẩn xong (hết animation) |
 
 ### Slots
 | Slot | Mô tả |
@@ -119,6 +123,7 @@ Banner là \`role="dialog"\` không modal (\`aria-labelledby\` tiêu đề, \`ar
   },
   argTypes: {
     position: { control: 'inline-radio', options: ['bottom', 'bottom-left', 'bottom-right'] },
+    open: { control: 'boolean', description: 'Banner đang hiện (gán để hiện / ẩn)' },
   },
 };
 
@@ -132,7 +137,7 @@ export const Default = {
     const cc = canvasElement.querySelector('hui-cookie-consent');
     await cc.updateComplete;
     const base = part(cc, 'base');
-    await expect(cc.isOpen).toBe(true);
+    await expect(cc.open).toBe(true);
     await expect(base.getAttribute('role')).toBe('dialog');
     await expect(base.getAttribute('aria-labelledby')).toBe(part(cc, 'title').id);
 
@@ -175,16 +180,16 @@ export const RememberedChoice = {
     };
     const first = make();
     await first.updateComplete;
-    await expect(first.isOpen).toBe(true);
+    await expect(first.open).toBe(true);
     first.rejectAll();
     await expect(readConsent(KEY)).toEqual({ necessary: true, analytics: false, marketing: false });
-    await expect(first.isOpen).toBe(false);
+    await expect(first.open).toBe(false);
     first.remove();
 
     // "Tải lại trang": thẻ mới cùng khóa → không hiện
     const second = make();
     await second.updateComplete;
-    await expect(second.isOpen).toBe(false);
+    await expect(second.open).toBe(false);
     await expect(second.consent).toEqual({ necessary: true, analytics: false, marketing: false });
 
     // Đổi phiên bản chính sách → hỏi lại
@@ -192,13 +197,13 @@ export const RememberedChoice = {
     const third = make();
     third.setAttribute('consent-version', '2');
     await third.updateComplete;
-    await waitFor(() => expect(third.isOpen).toBe(true));
+    await waitFor(() => expect(third.open).toBe(true));
     third.acceptAll();
 
     // reset() → xóa và hiện lại, focus vào nút đầu tiên
     third.reset();
     await expect(readConsent(KEY)).toBe(null);
-    await expect(third.isOpen).toBe(true);
+    await expect(third.open).toBe(true);
     await waitFor(() => expect(third.shadowRoot.activeElement).toBeTruthy());
     third.remove();
     clear(KEY);
@@ -216,7 +221,7 @@ export const Customize = {
     await cc.updateComplete;
     await userEvent.click(btn(cc, 'customize-button'));
     const dialog = part(cc, 'dialog');
-    await waitFor(() => expect(dialog.isOpen).toBe(true));
+    await waitFor(() => expect(dialog.open).toBe(true));
     const switches = [...cc.shadowRoot.querySelectorAll('[part="switch"]')];
     await expect(switches.length).toBe(4);
     // Nhóm bắt buộc: bật + khóa; checked mặc định theo dữ liệu
@@ -233,11 +238,11 @@ export const Customize = {
     await expect(detail.action).toBe('custom');
     await expect(detail.categories).toEqual({ necessary: true, preferences: false, analytics: true, marketing: false });
     await expect(detail.accepted).toEqual(['necessary', 'analytics']);
-    await waitFor(() => expect(dialog.isOpen).toBe(false));
+    await waitFor(() => expect(dialog.open).toBe(false));
 
     // Mở lại hộp: switch giữ lựa chọn đã lưu
     cc.openPreferences();
-    await waitFor(() => expect(dialog.isOpen).toBe(true));
+    await waitFor(() => expect(dialog.open).toBe(true));
     const again = [...cc.shadowRoot.querySelectorAll('[part="switch"]')];
     await expect(again[2].checked).toBe(true);
     dialog.close();
@@ -260,9 +265,9 @@ export const StorageUnavailable = {
       el.setAttribute('no-animation', '');
       canvasElement.querySelector('#host').append(el);
       await el.updateComplete;
-      await expect(el.isOpen).toBe(true);
+      await expect(el.open).toBe(true);
       el.acceptAll();
-      await expect(el.isOpen).toBe(false);
+      await expect(el.open).toBe(false);
       await expect(el.consent).toEqual({ necessary: true, analytics: true, marketing: true });
       el.remove();
     } finally {

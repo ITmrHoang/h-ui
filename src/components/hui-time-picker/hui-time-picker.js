@@ -32,8 +32,10 @@ const toSeconds = (v) => v.h * 3600 + v.m * 60 + v.s;
  * @fires input - Giá trị đổi do người dùng. detail: { value }
  * @fires change - Như input (phát ngay sau input). detail: { value }
  * @fires clear - Bấm nút xóa
- * @fires hui-open - Mở popup
- * @fires hui-close - Đóng popup
+ * @fires hui-open - Popup bắt đầu mở
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Popup bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
  * @csspart base - Khung ngoài
  * @csspart trigger - Khung ô nhập
  * @csspart input - Ô nhập chữ

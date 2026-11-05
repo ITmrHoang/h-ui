@@ -56,7 +56,12 @@ Khi chiều rộng navbar < \`breakpoint\`, vùng nav thu vào nút hamburger v�
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
-| \`open-change\` | \`{ open }\` | Panel mobile mở / đóng do người dùng |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Panel mobile bắt đầu mở / đóng (kể cả tự đóng khi chuyển sang desktop) |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+| \`open-change\` | \`{ open }\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\` |
+
+### Methods
+\`show()\`, \`hide()\`, \`toggle()\` — mở / đóng panel mobile (chỉ có tác dụng ở dạng mobile).
 
 ### Slots
 | Slot | Mô tả |

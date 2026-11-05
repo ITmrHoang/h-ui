@@ -1,6 +1,6 @@
 /**
  * HUI Cookie Consent — Banner đồng ý cookie (Chấp nhận tất cả / Từ chối / Tùy chỉnh theo nhóm).
- * Lựa chọn lưu trong localStorage (`storage-key`) → lần sau không hiện lại; `open()` / `reset()` để mở lại.
+ * Lựa chọn lưu trong localStorage (`storage-key`) → lần sau không hiện lại; `show()` / `reset()` để mở lại.
  * Hộp "Tùy chỉnh" dùng hui-modal + hui-switch cho từng nhóm cookie.
  */
 
@@ -101,10 +101,14 @@ export function readConsent(storageKey = DEFAULT_KEY) {
 
 /**
  * Banner đồng ý cookie. Hiện tự động nếu chưa có lựa chọn lưu trong localStorage (hoặc `consent-version` đổi).
- * Banner không chiếm focus khi tự hiện (không làm phiền người dùng bàn phím); `open()` thì đưa focus vào nút đầu tiên
+ * Banner không chiếm focus khi tự hiện (không làm phiền người dùng bàn phím); `show()` thì đưa focus vào nút đầu tiên
  * và trả focus về chỗ cũ sau khi chọn.
  *
  * @fires hui-consent - Người dùng chọn. detail: { categories: Record<id, boolean>, accepted: string[], action: 'accept-all' | 'reject-all' | 'custom' }
+ * @fires hui-open - Banner bắt đầu hiện (kể cả khi tự hiện vì chưa có lựa chọn)
+ * @fires hui-after-open - Banner đã hiện xong (hết animation)
+ * @fires hui-close - Banner bắt đầu ẩn (sau khi chọn, hoặc hide() / gán open = false)
+ * @fires hui-after-close - Banner đã ẩn xong (hết animation)
  * @slot - Nội dung mô tả (thay attribute message)
  * @slot title - Tiêu đề tùy biến (thay attribute heading)
  * @slot icon - Icon / hình minh họa phía trước
@@ -138,6 +142,8 @@ export function readConsent(storageKey = DEFAULT_KEY) {
  */
 class HuiCookieConsent extends HuiElement {
   static properties = {
+    /** Banner đang hiện. Gán true / false để hiện / ẩn (ẩn không lưu lựa chọn); tự bật khi chưa có lựa chọn hợp lệ */
+    open: { type: Boolean },
     /** bottom | bottom-left | bottom-right — bottom: dải ngang cả màn hình; còn lại: hộp nhỏ ở góc */
     position: { type: String, default: 'bottom' },
     /** Khóa localStorage lưu lựa chọn */
@@ -215,14 +221,19 @@ class HuiCookieConsent extends HuiElement {
     this._dlgAccept.addEventListener('hui-click', () => this.acceptAll());
     this._dialog = createElement('hui-modal', { part: 'dialog', centered: true, size: 'md' },
       this._list, this._saveBtn, this._dlgAccept);
+    // Sự kiện mở / đóng của hộp tùy chỉnh không lọt ra ngoài — trùng tên với sự kiện của banner
+    for (const type of ['hui-open', 'hui-after-open', 'hui-close', 'hui-after-close']) {
+      this._dialog.addEventListener(type, (e) => e.stopPropagation());
+    }
 
     return [this._base, this._dialog];
   }
 
   connectedCallback() {
     super.connectedCallback();
-    // Tự hiện khi chưa có lựa chọn hợp lệ (chạy cả khi gắn lại vào trang)
-    if (!this._visible && !this._hasValidConsent()) this._scheduleAutoShow();
+    // Có sẵn open → hiện luôn; không thì tự hiện khi chưa có lựa chọn hợp lệ (chạy cả khi gắn lại vào trang)
+    if (this.open && !this._visible) this._show(false);
+    else if (!this._visible && !this._hasValidConsent()) this._scheduleAutoShow();
   }
 
   disconnectedCallback() {
@@ -255,6 +266,10 @@ class HuiCookieConsent extends HuiElement {
     if (changed.has('hideReject')) this._rejectBtn.hidden = this.hideReject;
     if (changed.has('hideCustomize')) this._customBtn.hidden = this.hideCustomize;
     if (changed.has('categories') || changed.has('locale')) this._renderCategories();
+    if (changed.has('open') && this._mounted) {
+      if (this.open && !this._visible) this._show(false);
+      else if (!this.open && this._visible) this._hide();
+    }
     if (changed.has('storageKey') || changed.has('consentVersion')) {
       // Đổi khóa / phiên bản sau khi đã hiển thị: đồng bộ lại trạng thái
       if (this._mounted && !this._visible && !this._hasValidConsent()) this._scheduleAutoShow();
@@ -286,7 +301,7 @@ class HuiCookieConsent extends HuiElement {
     return { ...(readStore(this.storageKey || DEFAULT_KEY) || this._memory).categories };
   }
 
-  /** Banner đang hiện */
+  /** @deprecated Đọc `open` — giữ tạm cho code cũ, sẽ bỏ */
   get isOpen() {
     return this._visible;
   }
@@ -340,10 +355,14 @@ class HuiCookieConsent extends HuiElement {
     const token = ++this._token;
     if (!this._visible) {
       this._visible = true;
+      this.open = true;
       this._base.hidden = false;
       this._renderCategories();
       this.setState('open', true);
-      if (this._animated) animateIn(this._base, this.position === 'bottom' ? 'move-down' : 'slide-up', { duration: 300 });
+      const shown = this._animated
+        ? animateIn(this._base, this.position === 'bottom' ? 'move-down' : 'slide-up', { duration: 300 })
+        : null;
+      this._emitOpenEvents(true, shown);
     }
     if (focus) {
       requestAnimationFrame(() => {
@@ -354,23 +373,43 @@ class HuiCookieConsent extends HuiElement {
     }
   }
 
-  async _hide() {
+  _hide() {
+    clearTimeout(this._timer); // hủy lượt tự hiện đang chờ (delay)
     if (!this._visible) return;
     this._visible = false;
+    this.open = false;
     const token = ++this._token;
     this.setState('open', false);
-    if (this._animated) {
-      await animateOut(this._base, this.position === 'bottom' ? 'move-down' : 'slide-up', { duration: 250 });
-    }
-    if (token !== this._token) return;
-    this._base.hidden = true;
+    const done = (async () => {
+      if (this._animated) {
+        await animateOut(this._base, this.position === 'bottom' ? 'move-down' : 'slide-up', { duration: 250 });
+      }
+      if (token !== this._token) return;
+      this._base.hidden = true;
+    })();
+    this._emitOpenEvents(false, done);
   }
 
   /** Hiện banner (kể cả khi đã có lựa chọn) và đưa focus vào nút đầu tiên — vd: link "Cài đặt cookie" ở footer */
-  open() {
+  show() {
     const active = getDeepActiveElement();
     if (active && !this._containsNode(active)) this._returnFocus = active;
     this._show(true);
+  }
+
+  /** Ẩn banner mà không lưu lựa chọn (lần tải trang sau vẫn tự hiện nếu chưa chọn) */
+  hide() {
+    const returnTo = this._returnFocus;
+    this._returnFocus = null;
+    const focusInside = this._containsNode(getDeepActiveElement());
+    this._hide();
+    if (focusInside && returnTo?.isConnected) returnTo.focus?.({ preventScroll: true });
+  }
+
+  /** Hiện ↔ ẩn banner */
+  toggle() {
+    if (this._visible) this.hide();
+    else this.show();
   }
 
   /** Xóa lựa chọn đã lưu và hiện lại banner */
@@ -378,7 +417,7 @@ class HuiCookieConsent extends HuiElement {
     writeStore(this.storageKey || DEFAULT_KEY, null);
     this._memory = null;
     this._renderCategories();
-    this.open();
+    this.show();
   }
 
   /** Mở hộp tùy chỉnh theo nhóm */
@@ -386,7 +425,7 @@ class HuiCookieConsent extends HuiElement {
     const active = getDeepActiveElement();
     if (!this._visible && active && !this._containsNode(active)) this._returnFocus = active;
     this._renderCategories();
-    this._dialog.open();
+    this._dialog.show();
   }
 
   /** Chấp nhận mọi nhóm */
@@ -414,8 +453,8 @@ class HuiCookieConsent extends HuiElement {
     const focusInside = this._containsNode(getDeepActiveElement());
     const returnTo = this._returnFocus;
     this._returnFocus = null;
-    const dialogOpen = this._dialog.isOpen;
-    if (dialogOpen) this._dialog.close();
+    const dialogOpen = this._dialog.open;
+    if (dialogOpen) this._dialog.hide();
     this._hide();
     this._renderCategories();
     this.emit('hui-consent', {

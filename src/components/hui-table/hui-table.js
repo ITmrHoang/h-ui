@@ -81,7 +81,10 @@ function tx(key, vars) {
 }
 
 /** Sự kiện của control nội bộ — chặn lại để bên ngoài chỉ nhận sự kiện của bảng */
-const INNER_EVENTS = ['input', 'change', 'hui-change', 'open-change', 'clear', 'hui-search', 'hui-edit-start', 'hui-save', 'hui-saved', 'hui-save-error', 'hui-cancel'];
+const INNER_EVENTS = [
+  'input', 'change', 'hui-change', 'open-change', 'clear', 'hui-search', 'hui-edit-start', 'hui-save', 'hui-saved', 'hui-save-error', 'hui-cancel',
+  'hui-open', 'hui-after-open', 'hui-close', 'hui-after-close',
+];
 /** Chiều cao dòng mặc định (cuộn ảo) theo size */
 const ROW_HEIGHT = { sm: 40, md: 48, lg: 56 };
 /** Phần tử tương tác trong ô — không phát hui-row-click; chế độ grid: bỏ khỏi thứ tự Tab */

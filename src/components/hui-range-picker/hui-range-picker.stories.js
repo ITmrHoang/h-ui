@@ -77,7 +77,12 @@ Tuần này, Tháng này, Tháng trước, Năm nay).
 | Event | Detail | Mô tả |
 |-------|--------|-------|
 | \`input\` / \`change\` | \`{ value: [start, end], dates: [Date, Date] }\` | Khoảng đổi do người dùng (xóa: \`value: []\`) |
-| \`clear\` / \`hui-open\` / \`hui-close\` | — | |
+| \`clear\` | — | Bấm nút xóa |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Popup bắt đầu mở / đóng |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+
+### Methods
+\`show()\` / \`hide()\` / \`toggle()\` — mở / đóng popup (= gán \`open\`).
 
 ### Bàn phím
 | Phím | Hành động |

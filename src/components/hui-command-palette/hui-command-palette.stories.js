@@ -70,7 +70,7 @@ Mở bằng \`<dialog>.showModal()\` + overlay manager (Esc, click ngoài, giữ
 | Tên | Type | Default | Mô tả |
 |-----|------|---------|-------|
 | \`commands\` | array | — | \`[{ id, label, group, icon, shortcut, keywords, description, href, target, action, disabled }]\` |
-| \`open\` | boolean | \`false\` | Trạng thái mở (đọc \`isOpen\`) |
+| \`open\` | boolean | \`false\` | Trạng thái mở — đọc / gán \`palette.open\` (Vue \`:open\`) |
 | \`hotkey\` | string | \`mod+k\` | Phím mở/đóng (cú pháp hui-hotkey), \`none\` = tắt |
 | \`placeholder\` | string | "Tìm lệnh hoặc trang..." | Gợi ý ô tìm |
 | \`empty-text\` | string | "Không tìm thấy lệnh phù hợp" | Khi không có kết quả |
@@ -83,7 +83,8 @@ Mở bằng \`<dialog>.showModal()\` + overlay manager (Esc, click ngoài, giữ
 | \`no-animation\` | boolean | \`false\` | Tắt animation |
 
 ### Methods
-\`open()\`, \`close()\`, \`toggle()\`, \`isOpen\`, \`query\` (đọc/ghi từ khóa), \`results\`, \`recentIds\`, \`clearRecent()\`.
+\`show()\`, \`hide()\`, \`toggle()\`, \`query\` (đọc/ghi từ khóa), \`results\`, \`recentIds\`, \`clearRecent()\`.
+Đổi từ bản trước 0.5.2: \`open()\` → \`show()\`, \`close()\` → \`hide()\` (\`close()\` vẫn chạy), \`isOpen\` → \`open\`.
 Hàm lọc dùng lại: \`import { fuzzyMatch, foldText } from '@itmrhoang/h-ui/hui-command-palette'\`.
 
 ### Events
@@ -127,9 +128,9 @@ export const Default = {
   `,
   play: async ({ canvasElement }) => {
     const el = canvasElement.querySelector('hui-command-palette');
-    await expect(el.isOpen).toBe(false);
+    await expect(el.open).toBe(false);
     pressModK();
-    await waitFor(() => expect(el.isOpen).toBe(true));
+    await waitFor(() => expect(el.open).toBe(true));
     const dlg = el.shadowRoot.querySelector('dialog');
     await waitFor(() => expect(dlg.open).toBe(true));
     await waitFor(() => expect(el.shadowRoot.activeElement).toBe(input(el)));
@@ -162,18 +163,18 @@ export const Default = {
 
     // Esc đóng
     await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(el.isOpen).toBe(false));
+    await waitFor(() => expect(el.open).toBe(false));
     await waitFor(() => expect(dlg.open).toBe(false));
 
     // Bấm trigger cũng mở; chạy lệnh có action → đóng
     let ran = false;
     el.commands = [...COMMANDS, { id: 'act', label: 'Chạy hành động thử', group: 'Thử', action: () => { ran = true; } }];
     await userEvent.click(canvasElement.querySelector('hui-button'));
-    await waitFor(() => expect(el.isOpen).toBe(true));
+    await waitFor(() => expect(el.open).toBe(true));
     await userEvent.type(input(el), 'chay hanh');
     await userEvent.keyboard('{Enter}');
     await expect(ran).toBe(true);
-    await waitFor(() => expect(el.isOpen).toBe(false));
+    await waitFor(() => expect(el.open).toBe(false));
   },
 };
 
@@ -188,8 +189,8 @@ export const RecentCommands = {
     const el = canvasElement.querySelector('hui-command-palette');
     // keep-open tạm để chạy liên tiếp 2 lệnh
     el.keepOpen = true;
-    el.open();
-    await waitFor(() => expect(el.isOpen).toBe(true));
+    el.show();
+    await waitFor(() => expect(el.open).toBe(true));
     await userEvent.type(input(el), 'xuat');
     await userEvent.keyboard('{Enter}');
     el.query = 'khach';
@@ -203,8 +204,8 @@ export const RecentCommands = {
     await userEvent.keyboard('{ArrowUp}');
     await expect(activeLabel(el)).not.toBe('Đăng xuất');
     el.keepOpen = false;
-    el.close();
-    await waitFor(() => expect(el.isOpen).toBe(false));
+    el.hide();
+    await waitFor(() => expect(el.open).toBe(false));
   },
 };
 
@@ -226,7 +227,7 @@ export const EmptyState = {
     await expect(el.shadowRoot.querySelector('[part="empty"]').hidden).toBe(false);
     await expect(el.matches(':state(empty)')).toBe(true);
     await expect(input(el).hasAttribute('aria-activedescendant')).toBe(false);
-    el.close();
+    el.hide();
   },
 };
 
@@ -269,14 +270,14 @@ export const CustomizeFromOutside = {
   `,
   play: async ({ canvasElement }) => {
     const el = canvasElement.querySelector('hui-command-palette');
-    el.open();
+    el.show();
     await waitFor(() => expect(el.shadowRoot.querySelector('dialog').open).toBe(true));
     const panel = el.shadowRoot.querySelector('[part="panel"]');
     await expect(getComputedStyle(panel).borderTopLeftRadius).toBe('4px');
     const active = el.shadowRoot.querySelector('[part~="option-active"]');
     await expect(getComputedStyle(active).boxShadow).not.toBe('none');
     await expect(getComputedStyle(el.shadowRoot.querySelector('[part="group-label"]')).fontStyle).toBe('italic');
-    el.close();
-    await waitFor(() => expect(el.isOpen).toBe(false));
+    el.hide();
+    await waitFor(() => expect(el.open).toBe(false));
   },
 };

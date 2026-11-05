@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { HuiElement, defineElement } from '../src/core/hui-element.js';
 
 let uid = 0;
@@ -80,67 +80,41 @@ describe('HuiElement — attribute ↔ property', () => {
 
 });
 
-describe('HuiElement — property trùng tên method (vd: hui-modal open / open())', () => {
-  /** Giống hui-modal: property `open` + method `open()` / `close()` */
-  function makeOpenable() {
-    const tag = `x-openable-${++uid}`;
-    class Openable extends HuiElement {
-      static properties = { open: { type: Boolean } };
-      open() {
-        this._setProp('open', true);
-      }
-      close() {
-        this._setProp('open', false);
-      }
-      get isOpen() {
-        return this._props.open;
-      }
+describe('HuiElement — property trùng tên method', () => {
+  it('_methodConflicts() bắt method của chính lớp và method có sẵn của HTMLElement, cảnh báo lúc define', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    class Bad extends HuiElement {
+      static properties = { open: { type: Boolean }, click: { type: String }, title: { type: String } };
+      open() {}
     }
-    defineElement(tag, Openable);
-    return tag;
-  }
-
-  it('gán el.open = true / false đi qua setter; method open() vẫn gọi được', () => {
-    const tag = makeOpenable();
-    const el = document.createElement(tag);
-    document.body.append(el);
-
-    el.open = true; // Vue :open / React 19 gán property
-    expect(el.isOpen).toBe(true);
-    expect(el.hasAttribute('open')).toBe(true);
-    expect(Object.prototype.hasOwnProperty.call(el, 'open')).toBe(false); // không ghi đè method trên instance
-    expect(typeof el.open).toBe('function');
-
-    el.open = false;
-    expect(el.isOpen).toBe(false);
-    expect(el.hasAttribute('open')).toBe(false);
-
-    el.open();
-    expect(el.isOpen).toBe(true);
-    el.close();
-    expect(el.isOpen).toBe(false);
-
-    el.setAttribute('open', '');
-    expect(el.isOpen).toBe(true);
+    defineElement(`x-conflict-${++uid}`, Bad);
+    // title là accessor của HTMLElement (không phải method) → không tính
+    expect(Bad._methodConflicts()).toEqual(['open', 'click']);
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn.mock.calls[0][0]).toContain('property "open" trùng tên method open()');
+    warn.mockRestore();
   });
 
-  it('gán el.open trước khi define vẫn đi qua setter, method còn nguyên', () => {
-    const tag = `x-openable-late-${++uid}`;
-    const el = document.createElement(tag);
-    el.open = true; // chưa define → nằm trên instance
-    document.body.append(el);
-    class Late extends HuiElement {
+  it('quy ước overlay: property open là boolean thật, show() / hide() / toggle() đổi trạng thái', () => {
+    const tag = `x-overlay-${++uid}`;
+    class Overlay extends HuiElement {
       static properties = { open: { type: Boolean } };
-      open() {
-        this._setProp('open', true);
-      }
-      get isOpen() {
-        return this._props.open;
-      }
+      show() { this.open = true; }
+      hide() { this.open = false; }
+      toggle() { this.open = !this.open; }
     }
-    defineElement(tag, Late);
-    expect(el.isOpen).toBe(true);
-    expect(typeof el.open).toBe('function');
+    defineElement(tag, Overlay);
+    expect(Overlay._methodConflicts()).toEqual([]);
+    const el = document.createElement(tag);
+    document.body.append(el);
+    expect(el.open).toBe(false);
+    el.open = true;
+    expect(el.open).toBe(true);
+    expect(el.hasAttribute('open')).toBe(true);
+    el.hide();
+    expect(el.open).toBe(false);
+    el.toggle();
+    expect(el.open).toBe(true);
   });
 });
 

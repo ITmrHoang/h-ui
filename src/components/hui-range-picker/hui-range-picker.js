@@ -67,8 +67,10 @@ export function rangePresets(now = () => new Date()) {
  * @fires input - Khoảng đổi do người dùng. detail: { value: [start, end], dates: [Date, Date] } (xóa: value [])
  * @fires change - Như input (phát ngay sau input)
  * @fires clear - Bấm nút xóa
- * @fires hui-open - Mở popup
- * @fires hui-close - Đóng popup
+ * @fires hui-open - Popup bắt đầu mở
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Popup bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
  * @csspart base - Khung ngoài
  * @csspart trigger - Khung ô nhập
  * @csspart input - Mỗi ô nhập (kèm input-start | input-end)

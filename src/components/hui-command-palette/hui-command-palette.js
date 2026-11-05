@@ -126,8 +126,10 @@ let uid = 0;
 /**
  * Bảng lệnh.
  *
- * @fires hui-open - Vừa mở
- * @fires hui-close - Vừa đóng
+ * @fires hui-open - Bắt đầu mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
  * @fires hui-select - Chọn một lệnh (Enter / click). detail: { command, originalEvent }. Cancelable: preventDefault() → không chạy action / không mở href, bảng giữ nguyên
  * @fires hui-search - Từ khóa đổi. detail: { query, count }
  * @slot trigger - Nút / ô tìm giả mở bảng lệnh khi bấm
@@ -166,7 +168,7 @@ class HuiCommandPalette extends HuiElement {
   static localized = true;
 
   static properties = {
-    /** Trạng thái mở. Gán `palette.open = true / false` để mở / đóng; đọc bằng `isOpen` (vì `palette.open` trả về method `open()`) */
+    /** Trạng thái mở: đọc / gán `palette.open = true | false` (Vue `:open`) — hoặc show() / hide() / toggle() */
     open: { type: Boolean },
     /** Danh sách lệnh: [{ id, label, group, icon, shortcut, keywords, description, href, target, action, disabled }] */
     commands: { type: Array, default: null },
@@ -209,23 +211,31 @@ class HuiCommandPalette extends HuiElement {
   // PUBLIC API
   // =====================================================
 
-  /** Mở bảng lệnh */
-  open() {
-    this._setProp('open', true);
+  // Quy ước overlay chung: property `open` + show() / hide() / toggle() — không có method open() (trùng tên property)
+
+  /** Mở bảng lệnh (= `palette.open = true`) */
+  show() {
+    this.open = true;
   }
 
-  /** Đóng bảng lệnh */
-  close() {
-    this._setProp('open', false);
+  /** Đóng bảng lệnh (= `palette.open = false`) */
+  hide() {
+    this.open = false;
   }
 
   /** Mở ↔ đóng */
   toggle() {
-    this._setProp('open', !this._props.open);
+    this.open = !this.open;
   }
 
+  /** @deprecated Dùng hide() — giữ tạm cho code cũ, sẽ bỏ */
+  close() {
+    this.hide();
+  }
+
+  /** @deprecated Đọc `open` — giữ tạm cho code cũ, sẽ bỏ */
   get isOpen() {
-    return this._props.open;
+    return this.open;
   }
 
   /** Từ khóa đang gõ */
@@ -264,7 +274,7 @@ class HuiCommandPalette extends HuiElement {
     this._listId = `hui-cp-list-${id}`;
 
     this._triggerSlot = createElement('slot', { name: 'trigger' });
-    this._triggerSlot.addEventListener('click', () => this.open());
+    this._triggerSlot.addEventListener('click', () => this.show());
 
     this._input = createElement('input', {
       className: 'input', part: 'input', type: 'text', role: 'combobox',
@@ -313,11 +323,11 @@ class HuiCommandPalette extends HuiElement {
 
     this._dialog.addEventListener('cancel', (e) => {
       e.preventDefault();
-      if (this._handle?.isTop()) this.close();
+      if (this._handle?.isTop()) this.hide();
     });
     // Sự kiện 'close' đến sau 1 task: nếu đã mở lại ngay (dialog.open = true) thì bỏ qua, tránh đóng nhầm
     this._dialog.addEventListener('close', () => {
-      if (this._props.open && !this._dialog.open) this.close();
+      if (this._props.open && !this._dialog.open) this.hide();
     });
 
     return [this._triggerSlot, this._dialog];
@@ -356,9 +366,8 @@ class HuiCommandPalette extends HuiElement {
     if (['commands', 'recent', 'recentLimit', 'limit', 'emptyText', 'locale'].some((k) => changed.has(k))) this._refresh();
     if (changed.has('open')) {
       const first = !this._mounted;
-      if (this._props.open) this._show();
-      else if (!first) this._hide();
-      if (!first) this.emit(this._props.open ? 'hui-open' : 'hui-close');
+      const done = this._props.open ? this._show() : first ? null : this._hide();
+      if (!first) this._emitOpenEvents(this._props.open, done);
     }
   }
 
@@ -586,7 +595,7 @@ class HuiCommandPalette extends HuiElement {
     const ok = this.emit('hui-select', { command: c, originalEvent: e || null }, { cancelable: true });
     if (!ok) return;
     this._pushRecent(c);
-    if (!this.keepOpen) this.close();
+    if (!this.keepOpen) this.hide();
     else this._refresh();
     if (typeof c.action === 'function') c.action(c);
     if (c.href) {
@@ -615,8 +624,8 @@ class HuiCommandPalette extends HuiElement {
         trapFocus: true,
         lockScroll: true,
         restoreFocus: true,
-        onEscape: () => this.close(),
-        onClickOutside: () => this.close(),
+        onEscape: () => this.hide(),
+        onClickOutside: () => this.hide(),
       });
     }
     const dlg = this._dialog;
@@ -627,10 +636,8 @@ class HuiCommandPalette extends HuiElement {
     this._refresh(true);
     this.setState('open', true);
     this._input.focus({ preventScroll: true });
-    if (this._animated) {
-      animateIn(this._mask, 'fade');
-      animateIn(this._panel, 'slide-down');
-    }
+    if (this._animated) return Promise.all([animateIn(this._mask, 'fade'), animateIn(this._panel, 'slide-down')]);
+    return null;
   }
 
   async _hide() {

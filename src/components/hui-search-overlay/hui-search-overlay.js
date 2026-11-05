@@ -114,8 +114,10 @@ function writeRecent(key, list) {
  *
  * @fires hui-search - Nhấn Enter (không chọn gợi ý) hoặc chọn mục lịch sử. Cancelable (preventDefault() → giữ lớp phủ mở). detail: { query, recent }
  * @fires hui-select - Chọn một gợi ý. Cancelable (preventDefault() → không đóng, không điều hướng href). detail: { item, query }
- * @fires hui-open - Lớp phủ mở
- * @fires hui-close - Lớp phủ đóng
+ * @fires hui-open - Lớp phủ bắt đầu mở (không phát khi render lần đầu với sẵn attribute open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Lớp phủ bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
  * @fires hui-error - fetchFn bị lỗi. detail: { error, query }
  * @slot - Phần tử kích hoạt (mặc định: nút kính lúp + gợi ý phím tắt)
  * @slot empty - Nội dung khi ô tìm trống và chưa có lịch sử (vd: từ khóa phổ biến)
@@ -321,8 +323,9 @@ class HuiSearchOverlay extends HuiElement {
     }
     if (changed.has('suggestions') && this._mounted && this._dialog.open) this._runQuery(true);
     if (changed.has('open')) {
-      if (this.open) this._show();
-      else if (this._mounted) this._hide();
+      const done = this.open ? this._show() : this._mounted ? this._hide() : null;
+      // Không phát sự kiện ở lần render đầu (đã có sẵn attribute open)
+      if (this._mounted) this._emitOpenEvents(this.open, done);
     }
   }
 
@@ -343,6 +346,11 @@ class HuiSearchOverlay extends HuiElement {
   /** Đóng lớp phủ */
   hide() {
     this.open = false;
+  }
+
+  /** Mở ↔ đóng lớp phủ */
+  toggle() {
+    this.open = !this.open;
   }
 
   /** Nội dung đang nhập */
@@ -391,12 +399,9 @@ class HuiSearchOverlay extends HuiElement {
     this.setState('open', true);
     this._syncTriggerAria();
     this._runQuery(true);
-    if (this._animated) {
-      animateIn(this._dialog, 'fade');
-      animateIn(this._panel, 'slide-down');
-    }
     this._input.focus({ preventScroll: true });
-    this.emit('hui-open');
+    if (!this._animated) return null;
+    return Promise.all([animateIn(this._dialog, 'fade'), animateIn(this._panel, 'slide-down')]);
   }
 
   async _hide() {
@@ -416,7 +421,6 @@ class HuiSearchOverlay extends HuiElement {
     this._handle?.close();
     this._handle = null;
     this._syncTriggerAria();
-    this.emit('hui-close');
   }
 
   // =====================================================

@@ -245,7 +245,7 @@
       e.preventDefault();
       filterBar.shadowRoot?.querySelector('hui-search')?.focus();
     });
-    document.querySelector('#hk-help').addEventListener('hui-hotkey', () => document.querySelector('#shortcuts').open());
+    document.querySelector('#hk-help').addEventListener('hui-hotkey', () => document.querySelector('#shortcuts').show());
 
     // ===== Bảng lệnh (Ctrl/⌘ + K) =====
     const theme = (mode) => () => { applyTheme(mode); storeTheme(mode); }; // hui-theme-toggle tự đồng bộ qua hui-theme-change
@@ -260,7 +260,7 @@
       { id: 'dark', label: 'Giao diện tối', group: 'Giao diện', icon: 'moon', keywords: 'dark theme', action: theme('dark') },
       { id: 'light', label: 'Giao diện sáng', group: 'Giao diện', icon: 'sun', keywords: 'light theme', action: theme('light') },
       { id: 'system', label: 'Theo hệ thống', group: 'Giao diện', icon: 'monitor', keywords: 'system theme', action: theme('system') },
-      { id: 'help', label: 'Phím tắt', group: 'Trợ giúp', icon: 'info', shortcut: 'shift+/', action: () => document.querySelector('#shortcuts').open() },
+      { id: 'help', label: 'Phím tắt', group: 'Trợ giúp', icon: 'info', shortcut: 'shift+/', action: () => document.querySelector('#shortcuts').show() },
       { id: 'ex-shop', label: 'Trang mẫu: E-commerce', group: 'Trang mẫu', icon: 'cart', href: './ecommerce.html' },
       { id: 'ex-table', label: 'Trang mẫu: Bảng dữ liệu', group: 'Trang mẫu', icon: 'table', href: './table.html' },
       { id: 'ex-blog', label: 'Trang mẫu: Blog', group: 'Trang mẫu', icon: 'file', href: './blog.html' },
@@ -277,7 +277,7 @@
       <hui-menu-item key="examples" href="./index.html">Trang mẫu</hui-menu-item>
     </hui-menu>
     <hui-space slot="actions">
-      <button class="cmd-trigger" type="button" aria-label="Mở bảng lệnh" onclick="document.querySelector('hui-command-palette').open()">
+      <button class="cmd-trigger" type="button" aria-label="Mở bảng lệnh" onclick="document.querySelector('hui-command-palette').show()">
         <hui-icon name="search"></hui-icon><span>Tìm lệnh…</span><hui-kbd keys="mod+k" size="sm"></hui-kbd>
       </button>
       <hui-theme-toggle></hui-theme-toggle>

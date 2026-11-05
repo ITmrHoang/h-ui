@@ -223,7 +223,7 @@
       const extra = EMPLOYEES.filter((r) => keys.has(r.id) && !inPool.has(r.id));
       transfer.dataSource = [...pool, ...extra].map((r) => ({ key: String(r.id), title: r.name, description: `${r.role} · ${r.deptName}` }));
       transfer.value = [...keys].map(String);
-      modal.open();
+      modal.show();
     }
     document.querySelector('#assign-btn').addEventListener('hui-click', openAssign);
     document.querySelector('#assign-bulk').addEventListener('hui-click', openAssign);

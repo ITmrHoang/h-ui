@@ -56,8 +56,10 @@ function normalizeItem(raw, i) {
  * @fires hui-cart-change - Đổi số lượng / xóa / hoàn tác / thêm. detail: { items, total, count, reason, item }
  * @fires hui-checkout - Bấm thanh toán. Cancelable: preventDefault() chặn chuyển trang checkout-href. detail: { items, total, count }
  * @fires hui-continue - Bấm "Tiếp tục mua sắm" ở trạng thái trống (drawer tự đóng)
- * @fires hui-open - (từ hui-drawer) Vừa mở
+ * @fires hui-open - (từ hui-drawer) Bắt đầu mở
+ * @fires hui-after-open - (từ hui-drawer) Đã mở xong
  * @fires hui-close - (từ hui-drawer) Bắt đầu đóng
+ * @fires hui-after-close - (từ hui-drawer) Đã đóng xong
  * @slot footer-extra - Nội dung trên dòng tạm tính (vd hui-coupon-input)
  * @slot empty - Thay nút "Tiếp tục mua sắm" ở trạng thái trống
  * @slot header-extra - Vùng hành động bên phải tiêu đề

@@ -1,6 +1,6 @@
 /**
  * Vue 3.5 render thật lên component H-UI — các vấn đề gặp khi tích hợp vào app Vue:
- * - `:open` gán property `el.open` (vì 'open' in el) → trước đây ghi đè method open(), modal không mở
+ * - `:open` gán property `el.open` (vì 'open' in el) → trước đây ghi đè method open(), modal không mở; nay modal chỉ có show() / hide() / toggle()
  * - Boolean nhiều từ: `:confirm-loading="false"` (kebab-case, không có trong el) thành attribute "false" = true
  *   theo chuẩn HTML (giữ nguyên, xem README) → viết camelCase `:confirmLoading` để Vue gán property
  * - Enter trong <hui-input> (ô nhập nằm trong Shadow DOM) → từng không gửi <form> bên ngoài
@@ -31,44 +31,69 @@ afterEach(() => {
 });
 
 describe('Vue — hui-modal :open', () => {
-  it(':open="true / false" mở / đóng modal, method open() / close() vẫn dùng được', async () => {
-    const open = ref(false);
-    const host = mount(() => h('hui-modal', { title: 'Vue', open: open.value }, [h('p', 'Nội dung')]));
+  it(':open + @hui-close: mở / đóng theo state; người dùng bấm Hủy → state về false, mở lại được', async () => {
+    const visible = ref(false);
+    const host = mount(() => h('hui-modal', {
+      title: 'Vue',
+      open: visible.value,
+      onHuiClose: () => { visible.value = false; }, // = @hui-close trong template
+    }, [h('p', 'Nội dung')]));
     const modal = host.querySelector('hui-modal');
     const dialog = modal.shadowRoot.querySelector('dialog');
-    expect(modal.isOpen).toBe(false);
+    expect(modal.open).toBe(false);
 
-    open.value = true;
+    visible.value = true;
     await nextTick();
     await modal.updateComplete;
-    expect(modal.isOpen).toBe(true);
+    expect(modal.open).toBe(true); // property là boolean thật
     expect(dialog.open).toBe(true);
-    expect(typeof modal.open).toBe('function'); // method không bị ghi đè thành true
 
-    open.value = false;
+    // Người dùng bấm Hủy → modal tự đóng, phát hui-close → state đồng bộ về false
+    modal.shadowRoot.querySelector('[part="cancel-button"]').shadowRoot.querySelector('button').click();
+    await modal.updateComplete;
     await nextTick();
-    expect(modal.isOpen).toBe(false);
+    expect(visible.value).toBe(false);
+    expect(modal.open).toBe(false);
     await vi.waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
 
-    modal.open();
+    visible.value = true; // state đã về false nên mở lại được
+    await nextTick();
     await modal.updateComplete;
     expect(dialog.open).toBe(true);
-    modal.hide();
-    expect(modal.isOpen).toBe(false);
+    visible.value = false;
+    await nextTick();
     await vi.waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   });
 
-  it('hui-command-palette :open cũng mở / đóng được (cùng kiểu property + method open())', async () => {
+  it('show() / hide() / toggle() đổi property open; không còn method open()', async () => {
+    const host = mount(() => h('hui-modal', { title: 'API' }));
+    const modal = host.querySelector('hui-modal');
+    modal.show();
+    expect(modal.open).toBe(true);
+    modal.hide();
+    expect(modal.open).toBe(false);
+    modal.toggle();
+    expect(modal.open).toBe(true);
+    modal.close(); // tên khác của hide()
+    expect(modal.open).toBe(false);
+    expect(modal.isOpen).toBe(false); // getter cũ vẫn đọc được
+    expect(typeof modal.open).toBe('boolean');
+  });
+
+  it('hui-command-palette :open mở / đóng, property open là boolean', async () => {
     const open = ref(false);
     const host = mount(() => h('hui-command-palette', { open: open.value }));
     const palette = host.querySelector('hui-command-palette');
     open.value = true;
     await nextTick();
-    expect(palette.isOpen).toBe(true);
-    expect(typeof palette.open).toBe('function');
+    expect(palette.open).toBe(true);
     open.value = false;
     await nextTick();
-    expect(palette.isOpen).toBe(false);
+    expect(palette.open).toBe(false);
+    palette.show();
+    expect(palette.open).toBe(true);
+    palette.hide();
+    expect(palette.open).toBe(false);
   });
 });
 

@@ -49,7 +49,9 @@ el.addEventListener('hui-confirm', (e) => e.detail.waitUntil(api.delete(id)));
 |-------|--------|-------|
 | \`hui-confirm\` | \`{ waitUntil(promise) }\` | Bấm OK. Cancelable: \`preventDefault()\` giữ hộp mở. Gọi \`waitUntil\` đồng bộ trong listener để OK loading tới khi xong |
 | \`hui-cancel\` | — | Bấm Hủy |
-| \`open-change\` | \`{ open }\` | Mở / đóng |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+| \`open-change\` | \`{ open }\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\` |
 
 ### Slots
 | Slot | Mô tả |
@@ -58,7 +60,7 @@ el.addEventListener('hui-confirm', (e) => e.detail.waitUntil(api.delete(id)));
 | \`title\` / \`description\` / \`icon\` | Nội dung HTML thay attribute tương ứng |
 
 ### Methods
-\`show()\`, \`hide()\`.
+\`show()\`, \`hide()\`, \`toggle()\`.
 
 ### Bàn phím
 | Phím | Tác dụng |

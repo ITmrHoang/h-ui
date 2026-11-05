@@ -63,7 +63,7 @@ export default {
 | \`mouse-enter-delay\` / \`mouse-leave-delay\` | number | \`150\` / \`100\` | Độ trễ hover (ms) |
 
 Property \`menu\`: \`Array<{ key, label, icon?, disabled?, danger?, href?, divider?, type?: 'group', children? }>\`.
-Methods: \`show()\`, \`hide()\`, \`toggle()\`.
+Methods: \`show()\`, \`hide()\`, \`toggle()\` (cả hui-dropdown và hui-dropdown-button).
 
 ### Attributes — hui-dropdown-button
 \`variant\` (\`outline\`), \`size\`, \`disabled\`, \`loading\`, \`icon\`, \`arrow-icon\` (\`chevron-down\`), \`trigger\` (\`click\`),
@@ -73,7 +73,9 @@ Methods: \`show()\`, \`hide()\`, \`toggle()\`.
 | Event | Detail | Mô tả |
 |-------|--------|-------|
 | \`hui-select\` | \`{ key, keyPath, item }\` | Nổi bọt từ hui-menu bên trong khi chọn item (popup tự đóng) |
-| \`open-change\` | \`{ open }\` | Mở / đóng do người dùng hoặc method |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng (người dùng, method hay gán \`open\`; không phát khi render lần đầu) |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
+| \`open-change\` | \`{ open }\` | _Deprecated_ — dùng \`hui-open\` / \`hui-close\` |
 | \`hui-click\` _(dropdown-button)_ | \`{ originalEvent }\` | Bấm nút chính |
 
 ### Slots

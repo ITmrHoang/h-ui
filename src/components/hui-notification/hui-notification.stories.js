@@ -179,7 +179,7 @@ export const UpdateByKey = {
  */
 export const InsideModal = {
   render: () => html`
-    <hui-button @hui-click=${() => document.querySelector('#noti-modal').open()}>Mở Modal</hui-button>
+    <hui-button @hui-click=${() => document.querySelector('#noti-modal').show()}>Mở Modal</hui-button>
     <hui-modal id="noti-modal" title="Modal" @hui-ok=${(e) => {
       e.preventDefault();
       notification.info({
@@ -195,7 +195,7 @@ export const InsideModal = {
     notification.destroy();
     const modalEl = canvasElement.querySelector('#noti-modal');
     const dialog = modalEl.shadowRoot.querySelector('dialog');
-    modalEl.open();
+    modalEl.show();
     await waitFor(() => expect(dialog.open).toBe(true));
     const closeX = modalEl.shadowRoot.querySelector('[part="close"]');
     await waitFor(() => expect(modalEl.shadowRoot.activeElement).toBe(closeX));
@@ -223,9 +223,9 @@ export const InsideModal = {
     action.shadowRoot.querySelector('button').click();
     await expect(acted).toBe(1);
     await waitFor(() => expect(container.shadowRoot.querySelectorAll('.notice').length).toBe(0), { timeout: 3000 });
-    await expect(modalEl.isOpen).toBe(true);
+    await expect(modalEl.open).toBe(true);
 
-    modalEl.close();
+    modalEl.hide();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
     await waitFor(() => expect(container.parentNode).toBe(document.body));
   },

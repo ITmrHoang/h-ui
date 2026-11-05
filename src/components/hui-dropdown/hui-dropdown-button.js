@@ -15,7 +15,11 @@ const FALLBACK = { vi: 'Thêm tùy chọn', en: 'More options' };
 /**
  * @fires hui-click - Bấm nút chính. detail: { originalEvent }
  * @fires hui-select - (nổi bọt từ hui-menu) chọn một item. detail: { key, keyPath, item }
- * @fires open-change - Menu mở/đóng. detail: { open }
+ * @fires hui-open - Menu bắt đầu mở (phát từ hui-dropdown bên trong)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Menu bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Menu mở/đóng. detail: { open }
  * @slot - Nhãn nút chính
  * @slot menu - Nội dung menu (thường là <hui-menu>), ưu tiên hơn property menu
  * @csspart base - Khung nhóm 2 nút
@@ -83,6 +87,23 @@ class HuiDropdownButton extends HuiElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._observer?.disconnect();
+  }
+
+  // Quy ước overlay: property open + show() / hide() / toggle()
+
+  /** Mở menu */
+  show() {
+    this.open = true;
+  }
+
+  /** Đóng menu */
+  hide() {
+    this.open = false;
+  }
+
+  /** Mở ↔ đóng menu */
+  toggle() {
+    this.open = !this.open;
   }
 
   updated(changed) {

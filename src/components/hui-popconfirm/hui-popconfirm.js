@@ -24,7 +24,11 @@ const hasNodes = (slot) => slot.assignedNodes({ flatten: true }).some(
  * @fires hui-confirm - Bấm OK. Cancelable: preventDefault() để giữ mở. detail: { waitUntil(promise) } —
  *   gọi đồng bộ trong listener: nút OK loading tới khi promise resolve rồi mới đóng (reject → giữ mở)
  * @fires hui-cancel - Bấm Hủy
- * @fires open-change - Mở/đóng (phát từ hui-popover bên trong). detail: { open }
+ * @fires hui-open - Bắt đầu mở (phát từ hui-popover bên trong)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Mở/đóng (phát từ hui-popover bên trong). detail: { open }
  * @slot - Phần tử kích hoạt
  * @slot title - Tiêu đề HTML (thay attribute title)
  * @slot description - Mô tả HTML (thay attribute description)
@@ -76,6 +80,7 @@ class HuiPopconfirm extends HuiElement {
 
   show() { this._popover.show(); }
   hide() { this._popover.hide(); }
+  toggle() { this._popover.toggle(); }
 
   // =====================================================
   // RENDER

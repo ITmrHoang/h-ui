@@ -18,7 +18,11 @@ let uid = 0;
  * Thẻ nổi khi hover. Nội dung thẻ là phần tử slot="content" (light DOM) → trigger được gắn
  * `aria-describedby` trỏ tới nội dung (ID nằm cùng cây DOM nên trình đọc màn hình đọc được) và `aria-expanded`.
  *
- * @fires hui-open-change - Thẻ mở / đóng. detail: { open }
+ * @fires hui-open - Bắt đầu mở (người dùng, method hay gán open; không phát khi render lần đầu với sẵn open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires hui-open-change - (Deprecated, dùng hui-open / hui-close) Thẻ mở / đóng do người dùng hoặc method. detail: { open }
  * @slot - Phần tử kích hoạt (link tên người dùng, avatar…)
  * @slot content - Nội dung thẻ
  * @csspart trigger - Khung bọc trigger
@@ -108,7 +112,7 @@ class HuiHoverCard extends HuiElement {
 
   connectedCallback() {
     super.connectedCallback();
-    if (this._mounted && this.open) requestAnimationFrame(() => this._apply(this.open));
+    if (this._mounted && this.open) requestAnimationFrame(() => this._apply(this.open, true));
   }
 
   disconnectedCallback() {
@@ -127,7 +131,7 @@ class HuiHoverCard extends HuiElement {
     if (changed.has('arrow')) this._arrow.hidden = !this.arrow;
     if (changed.has('disabled') && this.disabled) this.hide();
     if (changed.has('open')) {
-      if (!this._mounted) requestAnimationFrame(() => this._apply(this.open));
+      if (!this._mounted) requestAnimationFrame(() => this._apply(this.open, true));
       else this._apply(this.open);
     }
     if (this._shown && ['placement', 'offset', 'arrow'].some((k) => changed.has(k))) this._position();
@@ -148,6 +152,12 @@ class HuiHoverCard extends HuiElement {
   hide() {
     this._clear();
     this._setOpen(false);
+  }
+
+  /** Mở ↔ đóng ngay */
+  toggle() {
+    this._clear();
+    this._setOpen(!this._shown);
   }
 
   // =====================================================
@@ -221,7 +231,8 @@ class HuiHoverCard extends HuiElement {
     return !this.noAnimation && !animationsDisabled();
   }
 
-  _apply(open) {
+  /** Áp trạng thái lên DOM + phát hui-open / hui-close… (`initial` = trạng thái lúc render đầu: không phát) */
+  _apply(open, initial = false) {
     if (open && (this.disabled || !this.isConnected || !this._contentEl())) open = false;
     if (open === this._shown) return;
     this._shown = open;
@@ -241,7 +252,8 @@ class HuiHoverCard extends HuiElement {
         onEscape: () => this._closeByEscape(),
         onClickOutside: () => this._setOpen(false),
       });
-      if (this._animated) animateIn(card, 'zoom', { origin: this._origin });
+      const shown = this._animated ? animateIn(card, 'zoom', { origin: this._origin }) : null;
+      if (!initial) this._emitOpenEvents(true, shown);
       return;
     }
 
@@ -251,8 +263,10 @@ class HuiHoverCard extends HuiElement {
       hideFloating(card);
       card.getAnimations?.().forEach((a) => a.cancel());
     };
-    if (this._animated) animateOut(card, 'zoom', { origin: this._origin }).then(done);
+    let hidden = null;
+    if (this._animated) hidden = animateOut(card, 'zoom', { origin: this._origin }).then(done);
     else done();
+    if (!initial) this._emitOpenEvents(false, hidden);
   }
 
   _teardown() {

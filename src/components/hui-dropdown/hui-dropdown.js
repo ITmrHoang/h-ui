@@ -45,7 +45,11 @@ export function buildMenuItems(items = []) {
 }
 
 /**
- * @fires open-change - Mở/đóng do người dùng hoặc method. detail: { open }
+ * @fires hui-open - Bắt đầu mở (người dùng, method hay gán open; không phát khi render lần đầu với sẵn open)
+ * @fires hui-after-open - Đã mở xong (hết animation)
+ * @fires hui-close - Bắt đầu đóng
+ * @fires hui-after-close - Đã đóng xong (hết animation)
+ * @fires open-change - (Deprecated, dùng hui-open / hui-close) Mở/đóng do người dùng hoặc method. detail: { open }
  * @fires hui-select - (nổi bọt từ hui-menu bên trong) chọn một item. detail: { key, keyPath, item }
  * @slot - Phần tử kích hoạt (trigger)
  * @slot menu - Nội dung popup, thường là một <hui-menu> (ưu tiên hơn property menu)
@@ -161,7 +165,7 @@ class HuiDropdown extends HuiElement {
     this.listen(document, 'pointerdown', (e) => {
       if (this._shown && !e.composedPath().includes(this)) this._setOpen(false);
     }, { capture: true });
-    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open));
+    if (this._mounted && this.open) requestAnimationFrame(() => this._applyOpen(this.open, true));
   }
 
   disconnectedCallback() {
@@ -182,7 +186,7 @@ class HuiDropdown extends HuiElement {
     if (changed.has('trigger') || changed.has('disabled')) this._syncTriggerAria();
 
     if (changed.has('open')) {
-      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open));
+      if (!this._mounted) requestAnimationFrame(() => this._applyOpen(this.open, true));
       else this._applyOpen(this.open);
     }
     if (this._shown && ['placement', 'arrow', 'offset', 'menu'].some((k) => changed.has(k))) this._position();
@@ -279,7 +283,8 @@ class HuiDropdown extends HuiElement {
     this.emit('open-change', { open });
   }
 
-  _applyOpen(open) {
+  /** Áp trạng thái lên DOM + phát hui-open / hui-close… (`initial` = trạng thái lúc render đầu: không phát) */
+  _applyOpen(open, initial = false) {
     if (open && (this.disabled || !this.isConnected)) open = false;
     if (open === this._shown) return;
     this._shown = open;
@@ -292,7 +297,7 @@ class HuiDropdown extends HuiElement {
       popup.getAnimations?.().forEach((a) => a.cancel());
       showFloating(popup, '--hui-z-dropdown');
       this._stopAutoUpdate = autoUpdate(this._trigger, popup, () => this._position());
-      animateIn(popup, this._side === 'top' ? 'slide-up' : 'slide-down', { origin: this._origin });
+      const shown = animateIn(popup, this._side === 'top' ? 'slide-up' : 'slide-down', { origin: this._origin });
       this._overlay = openOverlay({
         element: popup,
         ignore: [this._trigger],
@@ -304,16 +309,18 @@ class HuiDropdown extends HuiElement {
         onClickOutside: () => this._setOpen(false),
       });
       if (this._focusOnOpen) this._focusMenu();
+      if (!initial) this._emitOpenEvents(true, shown);
       return;
     }
 
     this._overlay?.close();
     this._overlay = null;
     this._menuEl()?._closeAllPopups?.();
-    animateOut(popup, this._side === 'top' ? 'slide-up' : 'slide-down', { origin: this._origin }).then(() => {
+    const hidden = animateOut(popup, this._side === 'top' ? 'slide-up' : 'slide-down', { origin: this._origin }).then(() => {
       if (token !== this._token) return;
       this._teardown();
     });
+    if (!initial) this._emitOpenEvents(false, hidden);
   }
 
   _teardown() {

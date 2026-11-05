@@ -42,7 +42,7 @@ export const lightbox = {
 
   /** Đóng lightbox dùng chung (nếu đang mở) */
   close() {
-    shared?.close();
+    shared?.hide();
   },
 
   /** Thẻ <hui-lightbox> dùng chung (null nếu chưa mở lần nào) */

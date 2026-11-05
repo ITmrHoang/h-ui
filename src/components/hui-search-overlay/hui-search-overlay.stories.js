@@ -61,14 +61,15 @@ gợi ý, lịch sử tìm kiếm.
 | \`no-animation\` | boolean | \`false\` | Tắt hiệu ứng |
 
 ### Properties & methods
-\`fetchFn(query, { signal })\` → \`Promise<Array>\` · \`query\` (đọc/ghi) · \`recentSearches\` · \`show()\` · \`hide()\` · \`clearRecent()\`
+\`fetchFn(query, { signal })\` → \`Promise<Array>\` · \`query\` (đọc/ghi) · \`recentSearches\` · \`show()\` · \`hide()\` · \`toggle()\` · \`clearRecent()\`
 
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
 | \`hui-search\` | \`{ query, recent }\` | Enter không chọn gợi ý / chọn mục lịch sử. Cancelable (giữ lớp phủ mở) |
 | \`hui-select\` | \`{ item, query }\` | Chọn gợi ý. Cancelable (không đóng, không theo \`href\`) |
-| \`hui-open\` / \`hui-close\` | — | Mở / đóng |
+| \`hui-open\` / \`hui-close\` | \`{}\` | Bắt đầu mở / đóng (không phát khi render lần đầu với sẵn \`open\`) |
+| \`hui-after-open\` / \`hui-after-close\` | \`{}\` | Đã mở / đóng xong (hết animation) |
 | \`hui-error\` | \`{ error, query }\` | fetchFn lỗi |
 
 ### Slots
