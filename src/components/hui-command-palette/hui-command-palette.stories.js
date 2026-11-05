@@ -84,7 +84,7 @@ Mở bằng \`<dialog>.showModal()\` + overlay manager (Esc, click ngoài, giữ
 
 ### Methods
 \`show()\`, \`hide()\`, \`toggle()\`, \`query\` (đọc/ghi từ khóa), \`results\`, \`recentIds\`, \`clearRecent()\`.
-Đổi từ bản trước 0.5.2: \`open()\` → \`show()\`, \`close()\` → \`hide()\` (\`close()\` vẫn chạy), \`isOpen\` → \`open\`.
+Đổi từ bản trước 0.6.0: \`open()\` → \`show()\`, \`close()\` → \`hide()\` (\`close()\` vẫn chạy), \`isOpen\` → \`open\`.
 Hàm lọc dùng lại: \`import { fuzzyMatch, foldText } from '@itmrhoang/h-ui/hui-command-palette'\`.
 
 ### Events

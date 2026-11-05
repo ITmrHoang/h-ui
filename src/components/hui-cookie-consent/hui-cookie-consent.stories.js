@@ -66,7 +66,7 @@ export default {
 ### Properties & methods
 | Tên | Mô tả |
 |-----|-------|
-| \`show()\` | Hiện banner + focus nút đầu tiên (trả focus về chỗ cũ sau khi chọn). Trước 0.5.2 tên là \`open()\` |
+| \`show()\` | Hiện banner + focus nút đầu tiên (trả focus về chỗ cũ sau khi chọn). Trước 0.6.0 tên là \`open()\` |
 | \`hide()\` / \`toggle()\` | Ẩn banner (không lưu lựa chọn) / hiện ↔ ẩn |
 | \`reset()\` | Xóa lựa chọn đã lưu rồi hiện lại |
 | \`openPreferences()\` | Mở hộp tùy chỉnh |

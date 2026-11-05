@@ -1,5 +1,5 @@
 ---
-"@itmrhoang/h-ui": patch
+"@itmrhoang/h-ui": minor
 ---
 
 **BREAKING — API overlay thống nhất + quy ước đặt tên** (`.agents/rules/naming_rule.md`).

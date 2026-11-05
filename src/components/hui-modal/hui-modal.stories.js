@@ -78,7 +78,7 @@ Tab chạy vòng trong modal (xuyên Shadow DOM), khóa cuộn trang, đóng xon
 Trạng thái là property \`open\` (boolean): đọc / gán \`modal.open\` — Vue \`:open="visible"\` + \`@hui-close="visible = false"\`,
 React 19 \`open={visible}\`. Cùng quy ước với hui-drawer, hui-popover, hui-dropdown…
 
-> **Đổi từ bản trước 0.5.2:** không còn method \`open()\` (trùng tên property) → dùng \`show()\`; \`close()\` → \`hide()\`
+> **Đổi từ bản trước 0.6.0:** không còn method \`open()\` (trùng tên property) → dùng \`show()\`; \`close()\` → \`hide()\`
 > (\`close()\` vẫn chạy); \`isOpen\` → \`open\` (\`isOpen\` vẫn đọc được).
 
 ### Gọi bằng hàm — \`modal.confirm | info | success | error | warning(options)\`
