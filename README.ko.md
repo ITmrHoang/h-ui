@@ -158,6 +158,16 @@ createApp(App).use(HuiVue, { components: false }).mount('#app');
 > Vue가 attribute로 설정합니다. `mount()` 전에 `await loadHui()`(위 예시), 정적 import
 > (`import '@itmrhoang/h-ui/hui-select'`), 또는 property 바인딩 강제(`:options.prop="cities"`)를 사용하세요.
 
+> **여러 단어 불리언 → camelCase**: Vue는 엘리먼트에 해당 이름의 property가 있을 때만 property로 설정합니다.
+> kebab-case `:confirm-loading="false"`는 property 이름이 아니므로 attribute `confirm-loading="false"`가 되고, 불리언
+> attribute는 HTML 규칙(있으면 **true**, `"false"`여도)을 따릅니다. `:confirmLoading="saving"`(또는
+> `:confirm-loading.camel`, 마운트 후 태그가 정의될 수 있다면 `.prop` 추가)으로 작성하세요. 한 단어(`:disabled`,
+> `:loading`, `:open`)는 그대로 쓰면 됩니다.
+>
+> **모달**: `:open="visible"`로 `hui-modal`(및 `hui-command-palette`)을 열고 닫을 수 있습니다. `modal.open`은 `open()`
+> 메서드이기도 하므로 상태는 `isOpen`으로 읽으세요(`show()` / `hide()`도 사용 가능). `hui-input`에서 Enter를 누르면
+> 네이티브 input처럼 해당 `<form>`이 제출됩니다.
+
 타입 힌트(Volar): 플러그인을 import하면 모든 태그에 대한 `GlobalComponents`(props, `@이벤트`, `v-model`)가 추가됩니다.
 플러그인 없이 쓰려면 tsconfig의 `compilerOptions.types`에 `"@itmrhoang/h-ui/types/vue"`를 추가하세요.
 

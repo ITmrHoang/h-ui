@@ -158,6 +158,16 @@ once components are loaded.
 > tag is defined, Vue sets it as an attribute. `await loadHui()` before `mount()` (as above), import statically
 > (`import '@itmrhoang/h-ui/hui-select'`), or force a property binding: `:options.prop="cities"`.
 
+> **Multi-word booleans → camelCase**: Vue sets a property only when the name exists on the element. Kebab-case
+> `:confirm-loading="false"` is not a property name, so it becomes the attribute `confirm-loading="false"`, and boolean
+> attributes follow HTML (present = **true**, even `"false"`). Write `:confirmLoading="saving"` (or
+> `:confirm-loading.camel`; add `.prop` too if the tag may load after mount). One-word ones (`:disabled`, `:loading`,
+> `:open`) are fine as is.
+>
+> **Modals**: `:open="visible"` opens / closes `hui-modal` (and `hui-command-palette`). Read the state with `isOpen`,
+> since `modal.open` is also the `open()` method (`show()` / `hide()` work too). Pressing Enter in a `hui-input` submits
+> its `<form>` like a native input.
+
 Type hints (Volar): importing the plugin adds `GlobalComponents` for every tag (props, `@events`, `v-model`);
 without the plugin, add `"@itmrhoang/h-ui/types/vue"` to `compilerOptions.types` in tsconfig.
 
@@ -400,6 +410,15 @@ directive `v-hui-model` (`directive: false` để tắt), gắn `isCustomElement
 > Component tải **bất đồng bộ** (plugin / `loadHui`): truyền mảng/object qua `:options` khi thẻ chưa được define thì Vue
 > gán thành attribute. Hãy `await loadHui()` trước `mount()` (như trên), import tĩnh (`import '@itmrhoang/h-ui/hui-select'`),
 > hoặc ép gán property: `:options.prop="cities"`.
+
+> **Boolean nhiều từ → viết camelCase**: Vue chỉ gán property khi tên đó có trên element. `:confirm-loading="false"`
+> (kebab-case) không phải tên property nên thành attribute `confirm-loading="false"`, mà boolean attribute theo chuẩn HTML
+> (có mặt là **true**, kể cả `"false"`). Hãy viết `:confirmLoading="saving"` (hoặc `:confirm-loading.camel`; thêm `.prop` nếu
+> thẻ có thể được define sau khi mount). Boolean một từ (`:disabled`, `:loading`, `:open`) dùng bình thường.
+>
+> **Modal**: `:open="visible"` mở / đóng được `hui-modal` (và `hui-command-palette`). Đọc trạng thái bằng `isOpen` vì
+> `modal.open` đồng thời là method `open()` (dùng `show()` / `hide()` cũng được). Nhấn Enter trong `hui-input` gửi
+> `<form>` chứa nó như `<input>` thường.
 
 Gợi ý kiểu (Volar): import plugin là có `GlobalComponents` cho mọi thẻ (props, `@sự-kiện`, `v-model`);
 không dùng plugin thì thêm `"@itmrhoang/h-ui/types/vue"` vào `compilerOptions.types` của tsconfig.
