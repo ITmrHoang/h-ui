@@ -166,7 +166,7 @@ class HuiCommandPalette extends HuiElement {
   static localized = true;
 
   static properties = {
-    /** Trạng thái mở. Đọc bằng `isOpen` (vì `open()` là method) */
+    /** Trạng thái mở. Gán `palette.open = true / false` để mở / đóng; đọc bằng `isOpen` (vì `palette.open` trả về method `open()`) */
     open: { type: Boolean },
     /** Danh sách lệnh: [{ id, label, group, icon, shortcut, keywords, description, href, target, action, disabled }] */
     commands: { type: Array, default: null },

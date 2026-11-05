@@ -128,8 +128,8 @@ export class HuiElement extends HTMLElement {
     for (const [name, opts] of map) {
       if (opts.attribute) this._attributeToProp.set(opts.attribute, name);
 
-      // Lớp con tự viết getter/setter riêng thì không ghi đè
-      if (!Object.prototype.hasOwnProperty.call(this.prototype, name)) {
+      const own = Object.getOwnPropertyDescriptor(this.prototype, name);
+      if (!own) {
         Object.defineProperty(this.prototype, name, {
           configurable: true,
           enumerable: true,
@@ -140,7 +140,23 @@ export class HuiElement extends HTMLElement {
             this._setProp(name, value);
           },
         });
+      } else if (typeof own.value === 'function') {
+        // Property trùng tên method (vd: hui-modal có property `open` và method `open()`):
+        // get trả về chính method → `modal.open()` vẫn gọi được; set đi qua _setProp → `modal.open = true`
+        // (Vue `:open`, React 19, gán tay) mở được modal thay vì ghi đè mất method. Đọc trạng thái: `isOpen`.
+        const method = own.value;
+        Object.defineProperty(this.prototype, name, {
+          configurable: true,
+          enumerable: false,
+          get() {
+            return method;
+          },
+          set(value) {
+            this._setProp(name, value);
+          },
+        });
       }
+      // Còn lại: lớp con tự viết getter/setter riêng → không ghi đè
     }
     return [...this._attributeToProp.keys()];
   }

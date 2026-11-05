@@ -67,7 +67,10 @@ const toLength = (v) => (/^\d+(\.\d+)?$/.test(String(v).trim()) ? `${v}px` : Str
  */
 class HuiModal extends HuiElement {
   static properties = {
-    /** Trạng thái mở. Đọc bằng `isOpen` (vì `open()` là method) */
+    /**
+     * Trạng thái mở. Gán `modal.open = true / false` (Vue `:open`, React 19) để mở / đóng.
+     * Đọc bằng `isOpen`: `modal.open` trả về method `open()` (giữ API cũ) — xem HuiElement.observedAttributes
+     */
     open: { type: Boolean },
     /** Tiêu đề (hoặc dùng slot="title") */
     title: { type: String },
@@ -114,13 +117,23 @@ class HuiModal extends HuiElement {
   // PUBLIC API
   // =====================================================
 
-  /** Mở modal (giữ API cũ: method, không phải property) */
+  /** Mở modal (giữ API cũ). Tương đương `show()` / `modal.open = true` */
   open() {
     this._setProp('open', true);
   }
 
-  /** Đóng modal (không phát hui-cancel) */
+  /** Đóng modal (không phát hui-cancel). Tương đương `hide()` / `modal.open = false` */
   close() {
+    this._setProp('open', false);
+  }
+
+  /** Mở modal — cùng tên với hui-drawer, hui-popover... */
+  show() {
+    this._setProp('open', true);
+  }
+
+  /** Đóng modal (không phát hui-cancel) — cùng tên với hui-drawer, hui-popover... */
+  hide() {
     this._setProp('open', false);
   }
 

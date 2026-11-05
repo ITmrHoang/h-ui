@@ -36,7 +36,7 @@ Tab chạy vòng trong modal (xuyên Shadow DOM), khóa cuộn trang, đóng xon
 ### Attributes
 | Attribute | Type | Default | Mô tả |
 |-----------|------|---------|-------|
-| \`open\` | boolean | \`false\` | Hiển thị/ẩn modal |
+| \`open\` | boolean | \`false\` | Hiển thị/ẩn modal. Gán property \`modal.open = true / false\` (Vue \`:open\`) cũng mở / đóng được |
 | \`title\` | string | \`''\` | Tiêu đề modal |
 | \`size\` | string | \`md\` | Kích thước: sm, md, lg, full |
 | \`width\` | string | — | Chiều rộng: số (px) hoặc độ dài CSS — ưu tiên hơn \`size\` và \`--hui-modal-width\` |
@@ -71,9 +71,12 @@ Tab chạy vòng trong modal (xuyên Shadow DOM), khóa cuộn trang, đóng xon
 ### Methods
 | Method | Mô tả |
 |--------|-------|
-| \`open()\` | Mở modal từ JS |
-| \`close()\` | Đóng modal từ JS |
+| \`show()\` / \`open()\` | Mở modal từ JS (\`open()\` giữ cho code cũ) |
+| \`hide()\` / \`close()\` | Đóng modal từ JS (không phát \`hui-cancel\`) |
 | \`isOpen\` | (getter) Modal đang mở hay không |
+
+Gán property cũng được: \`modal.open = true / false\` (Vue \`:open="visible"\`, React 19 \`open={visible}\`).
+Đọc trạng thái bằng \`isOpen\` — \`modal.open\` trả về method \`open()\` để code cũ \`modal.open()\` không vỡ.
 
 ### Gọi bằng hàm — \`modal.confirm | info | success | error | warning(options)\`
 \`\`\`js
@@ -431,6 +434,50 @@ export const CenteredAndWidth = {
     await new Promise((r) => setTimeout(r, 100));
     await expect(el.isOpen).toBe(true);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
+  },
+};
+
+/**
+ * Mở / đóng bằng property — `modal.open = true / false` (cách Vue `:open="visible"` / React 19 `open={visible}` gán),
+ * `show()` / `hide()` và `open()` / `close()` cũ vẫn dùng được. Đọc trạng thái bằng `isOpen`.
+ */
+export const OpenByProperty = {
+  render: () => html`
+    <div style="display: flex; gap: 12px; padding: 16px;">
+      <hui-button variant="primary" @hui-click=${() => { document.querySelector('#modal-prop').open = true; }}>
+        modal.open = true
+      </hui-button>
+    </div>
+    <hui-modal id="modal-prop" title="Mở bằng property" no-animation>
+      <p>Được mở bằng <code>modal.open = true</code>.</p>
+      <div slot="footer">
+        <hui-button @hui-click=${() => { document.querySelector('#modal-prop').open = false; }}>modal.open = false</hui-button>
+      </div>
+    </hui-modal>
+  `,
+  play: async ({ canvasElement }) => {
+    const el = canvasElement.querySelector('#modal-prop');
+    const dialog = el.shadowRoot.querySelector('dialog');
+
+    el.open = true;
+    await waitFor(() => expect(dialog.open).toBe(true));
+    await expect(el.isOpen).toBe(true);
+    await expect(el.hasAttribute('open')).toBe(true);
+    await expect(typeof el.open).toBe('function'); // method open() không bị ghi đè
+
+    el.open = false;
+    await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
+    await expect(el.isOpen).toBe(false);
+
+    el.show();
+    await waitFor(() => expect(dialog.open).toBe(true));
+    el.hide();
+    await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
+
+    el.open(); // API cũ
+    await waitFor(() => expect(dialog.open).toBe(true));
+    el.close();
     await waitFor(() => expect(dialog.open).toBe(false), { timeout: 2000 });
   },
 };

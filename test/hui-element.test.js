@@ -77,6 +77,71 @@ describe('HuiElement — attribute ↔ property', () => {
     expect(el.size).toBe('lg');
     expect(el.getAttribute('size')).toBe('lg');
   });
+
+});
+
+describe('HuiElement — property trùng tên method (vd: hui-modal open / open())', () => {
+  /** Giống hui-modal: property `open` + method `open()` / `close()` */
+  function makeOpenable() {
+    const tag = `x-openable-${++uid}`;
+    class Openable extends HuiElement {
+      static properties = { open: { type: Boolean } };
+      open() {
+        this._setProp('open', true);
+      }
+      close() {
+        this._setProp('open', false);
+      }
+      get isOpen() {
+        return this._props.open;
+      }
+    }
+    defineElement(tag, Openable);
+    return tag;
+  }
+
+  it('gán el.open = true / false đi qua setter; method open() vẫn gọi được', () => {
+    const tag = makeOpenable();
+    const el = document.createElement(tag);
+    document.body.append(el);
+
+    el.open = true; // Vue :open / React 19 gán property
+    expect(el.isOpen).toBe(true);
+    expect(el.hasAttribute('open')).toBe(true);
+    expect(Object.prototype.hasOwnProperty.call(el, 'open')).toBe(false); // không ghi đè method trên instance
+    expect(typeof el.open).toBe('function');
+
+    el.open = false;
+    expect(el.isOpen).toBe(false);
+    expect(el.hasAttribute('open')).toBe(false);
+
+    el.open();
+    expect(el.isOpen).toBe(true);
+    el.close();
+    expect(el.isOpen).toBe(false);
+
+    el.setAttribute('open', '');
+    expect(el.isOpen).toBe(true);
+  });
+
+  it('gán el.open trước khi define vẫn đi qua setter, method còn nguyên', () => {
+    const tag = `x-openable-late-${++uid}`;
+    const el = document.createElement(tag);
+    el.open = true; // chưa define → nằm trên instance
+    document.body.append(el);
+    class Late extends HuiElement {
+      static properties = { open: { type: Boolean } };
+      open() {
+        this._setProp('open', true);
+      }
+      get isOpen() {
+        return this._props.open;
+      }
+    }
+    defineElement(tag, Late);
+    expect(el.isOpen).toBe(true);
+    expect(typeof el.open).toBe('function');
+  });
 });
 
 describe('HuiElement — chu kỳ cập nhật', () => {
