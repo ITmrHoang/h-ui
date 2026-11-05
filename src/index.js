@@ -234,4 +234,6 @@ export { default as HuiTable } from './components/hui-table/index.js';
 
 // Hoàn thiện
 export { default as HuiHighlight, highlightText, parseQuery } from './components/hui-highlight/index.js';
+export { default as HuiMath, latexToMathML } from './components/hui-math/index.js';
+export { default as HuiMarkdown, renderMarkdown } from './components/hui-markdown/index.js';
 export { default as HuiVirtualList } from './components/hui-virtual-list/index.js';

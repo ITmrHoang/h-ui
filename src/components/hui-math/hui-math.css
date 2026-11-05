@@ -1,0 +1,28 @@
+/*
+ * HUI Math — biến override: --hui-math-font-size, --hui-math-color
+ * Parts: base
+ */
+
+:host {
+  display: inline;
+}
+
+:host([display]) {
+  display: block;
+}
+
+.math {
+  font-size: var(--hui-math-font-size, 1.05em);
+  color: var(--hui-math-color, inherit);
+}
+
+.math--display {
+  display: block;
+  margin: 0.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+math {
+  font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', math;
+}

@@ -477,6 +477,11 @@
       "import": "./dist/hui-map.esm.js",
       "default": "./dist/hui-map.esm.js"
     },
+    "./hui-markdown": {
+      "types": "./dist/types/hui-markdown.d.ts",
+      "import": "./dist/hui-markdown.esm.js",
+      "default": "./dist/hui-markdown.esm.js"
+    },
     "./hui-marquee": {
       "types": "./dist/types/hui-marquee.d.ts",
       "import": "./dist/hui-marquee.esm.js",
@@ -486,6 +491,11 @@
       "types": "./dist/types/hui-masonry.d.ts",
       "import": "./dist/hui-masonry.esm.js",
       "default": "./dist/hui-masonry.esm.js"
+    },
+    "./hui-math": {
+      "types": "./dist/types/hui-math.d.ts",
+      "import": "./dist/hui-math.esm.js",
+      "default": "./dist/hui-math.esm.js"
     },
     "./hui-media-card": {
       "types": "./dist/types/hui-media-card.d.ts",

@@ -52,6 +52,8 @@ export const CDN_GROUPS = {
     'hui-typewriter', 'hui-video',
   ],
   // Thương mại điện tử
+  // Học tập: công thức, nội dung bài học / câu hỏi
+  learning: ['hui-markdown', 'hui-math'],
   shop: [
     'hui-add-to-cart', 'hui-cart-drawer', 'hui-coupon-input', 'hui-free-ship-bar', 'hui-image-zoom', 'hui-price',
     'hui-product-card', 'hui-quantity', 'hui-review-list', 'hui-variant-picker', 'hui-wishlist-toggle',
