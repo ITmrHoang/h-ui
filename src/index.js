@@ -177,6 +177,7 @@ export { default as HuiSortable } from './components/hui-sortable/index.js';
 export { default as HuiConfirmAction } from './components/hui-confirm-action/index.js';
 export { default as HuiCommandPalette, fuzzyMatch } from './components/hui-command-palette/index.js';
 export { default as HuiKanban } from './components/hui-kanban/index.js';
+export { default as HuiTimetable } from './components/hui-timetable/index.js';
 
 // Landing (A2 / A6 — đợt 2)
 export { default as HuiFeatureCard } from './components/hui-feature-card/index.js';

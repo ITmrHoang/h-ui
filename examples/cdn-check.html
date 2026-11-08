@@ -18,13 +18,13 @@
        ?bundle=core,data — core trước, rồi các nhóm cần dùng:
          <script src="https://cdn.jsdelivr.net/npm/@itmrhoang/h-ui@0/dist/cdn/h-ui-core.min.js"></script>
          <script src="https://cdn.jsdelivr.net/npm/@itmrhoang/h-ui@0/dist/cdn/h-ui-data.min.js"></script>
-       ?bundle=groups — core + cả 4 nhóm (kiểm tra không thẻ nào bị đăng ký 2 lần)
+       ?bundle=groups — core + cả 5 nhóm (kiểm tra không thẻ nào bị đăng ký 2 lần)
        ?bundle=core — chỉ core (thẻ của nhóm khác phải CHƯA được định nghĩa) -->
   <script>
     window.__bundle = new URLSearchParams(location.search).get('bundle') || 'all';
     /** Nhóm đã tải (null = bản trọn gói) */
     window.__groups = window.__bundle === 'all' ? null
-      : window.__bundle === 'groups' ? ['core', 'form', 'data', 'marketing', 'shop']
+      : window.__bundle === 'groups' ? ['core', 'form', 'data', 'marketing', 'learning', 'shop']
         : ['core', ...window.__bundle.split(',').filter((g) => g && g !== 'core')];
     const FILES = window.__groups ? window.__groups.map((g) => `h-ui-${g}.min.js`) : ['h-ui.min.js'];
     // document.write → script thường, chạy tuần tự đúng như khi viết tay các thẻ <script>
@@ -36,9 +36,9 @@
   <h1>Bản CDN</h1>
   <p>
     Đang thử: <strong id="mode"></strong> —
-    <a href="?bundle=all">trọn gói</a> · <a href="?bundle=groups">core + 4 nhóm</a> · <a href="?bundle=core">chỉ core</a> ·
+    <a href="?bundle=all">trọn gói</a> · <a href="?bundle=groups">core + 5 nhóm</a> · <a href="?bundle=core">chỉ core</a> ·
     <a href="?bundle=core,form">core + form</a> · <a href="?bundle=core,data">core + data</a> ·
-    <a href="?bundle=core,marketing">core + marketing</a> · <a href="?bundle=core,shop">core + shop</a>
+    <a href="?bundle=core,marketing">core + marketing</a> · <a href="?bundle=core,learning">core + learning</a> · <a href="?bundle=core,shop">core + shop</a>
   </p>
   <hui-button icon="check" id="btn">Bấm thử</hui-button>
   <hui-card title="Card" effect="lift tilt" style="max-width: 240px; margin-top: 16px">window.HUI có sẵn</hui-card>

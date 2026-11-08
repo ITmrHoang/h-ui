@@ -1,11 +1,11 @@
 /**
  * Kiểm tra bản CDN trong Chromium thật (Playwright): mở examples/cdn-check.html bằng file:// với từng cách tải
  *   ?bundle=all          h-ui.min.js trọn gói
- *   ?bundle=groups       h-ui-core + form + data + marketing + shop cùng lúc
+ *   ?bundle=groups       h-ui-core + form + data + marketing + learning + shop cùng lúc
  *   ?bundle=core         chỉ core
  *   ?bundle=core,<nhóm>  core + 1 nhóm (nhóm không phụ thuộc ngầm vào nhóm khác)
  * Lỗi khi: có lỗi JS, thẻ trên trang không được đăng ký, thẻ của nhóm chưa tải lại có mặt, 1 thẻ bị define 2 lần,
- * thẻ của nhóm không dùng chung HuiElement với core, hoặc core + 4 nhóm thiếu thẻ nào đó của bản trọn gói.
+ * thẻ của nhóm không dùng chung HuiElement với core, hoặc core + các nhóm thiếu thẻ nào đó của bản trọn gói.
  *   npm run build:cdn && npm run check:cdn
  */
 import { chromium } from 'playwright';

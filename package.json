@@ -867,6 +867,11 @@
       "import": "./dist/hui-timeline-feed.esm.js",
       "default": "./dist/hui-timeline-feed.esm.js"
     },
+    "./hui-timetable": {
+      "types": "./dist/types/hui-timetable.d.ts",
+      "import": "./dist/hui-timetable.esm.js",
+      "default": "./dist/hui-timetable.esm.js"
+    },
     "./hui-toc": {
       "types": "./dist/types/hui-toc.d.ts",
       "import": "./dist/hui-toc.esm.js",

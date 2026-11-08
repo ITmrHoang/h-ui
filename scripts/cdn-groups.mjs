@@ -34,7 +34,7 @@ export const CDN_GROUPS = {
     'hui-card-grid', 'hui-chart', 'hui-code-block', 'hui-data-view', 'hui-description-card', 'hui-descriptions', 'hui-editable',
     'hui-infinite-scroll', 'hui-kanban', 'hui-kpi-row', 'hui-list', 'hui-masonry', 'hui-progress-card', 'hui-qrcode',
     'hui-sortable', 'hui-splitter', 'hui-stat-card', 'hui-statistic', 'hui-step-progress', 'hui-table',
-    'hui-timeline', 'hui-timeline-feed', 'hui-tour', 'hui-transfer', 'hui-tree', 'hui-virtual-list',
+    'hui-timeline', 'hui-timeline-feed', 'hui-timetable', 'hui-tour', 'hui-transfer', 'hui-tree', 'hui-virtual-list',
     'hui-watermark',
   ],
   // Landing page / website: khối trang, điều hướng, media, hiệu ứng cuộn & chữ
@@ -51,9 +51,9 @@ export const CDN_GROUPS = {
     'hui-sticky', 'hui-team-grid', 'hui-testimonial', 'hui-testimonial-slider', 'hui-text-rotate', 'hui-toc',
     'hui-typewriter', 'hui-video',
   ],
-  // Thương mại điện tử
   // Học tập: công thức, nội dung bài học / câu hỏi
   learning: ['hui-markdown', 'hui-math'],
+  // Thương mại điện tử
   shop: [
     'hui-add-to-cart', 'hui-cart-drawer', 'hui-coupon-input', 'hui-free-ship-bar', 'hui-image-zoom', 'hui-price',
     'hui-product-card', 'hui-quantity', 'hui-review-list', 'hui-variant-picker', 'hui-wishlist-toggle',

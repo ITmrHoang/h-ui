@@ -1,0 +1,401 @@
+/*
+ * HUI Timetable — biến override:
+ *   --hui-timetable-hour-height   Chiều cao một giờ (48px)
+ *   --hui-timetable-max-height    Chiều cao tối đa vùng cuộn (640px)
+ *   --hui-timetable-gutter        Bề rộng cột giờ (3.5rem)
+ *   --hui-timetable-min-column    Bề rộng tối thiểu một ngày (5.5rem)
+ *   --hui-timetable-bg            Nền
+ *   --hui-timetable-border-color  Đường kẻ
+ *   --hui-timetable-today-bg      Nền cột hôm nay
+ *   --hui-timetable-now-color     Vạch giờ hiện tại
+ *   --hui-timetable-radius        Bo góc
+ * Parts: base, toolbar, nav-btn, today-btn, title, view-switch, view-btn, empty, body, day-head, column, event,
+ *        now, selection
+ */
+
+:host {
+  display: block;
+  font-family: var(--hui-font-family);
+  color: var(--hui-text);
+  --_hour: var(--hui-timetable-hour-height, 48px);
+  --_line: var(--hui-timetable-border-color, var(--hui-border-secondary, var(--hui-border)));
+  --_bg: var(--hui-timetable-bg, var(--hui-bg-container, var(--hui-surface)));
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.tt {
+  box-sizing: border-box;
+  background: var(--_bg);
+  border: 1px solid var(--_line);
+  border-radius: var(--hui-timetable-radius, var(--hui-radius-md));
+  overflow: hidden;
+}
+
+/* === Thanh điều hướng === */
+.tt__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hui-space-sm) var(--hui-space-md);
+  padding: var(--hui-space-sm) var(--hui-space-md);
+  border-bottom: 1px solid var(--_line);
+}
+
+.tt__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hui-space-xs);
+}
+
+.tt__btn,
+.tt__view {
+  box-sizing: border-box;
+  height: var(--hui-size-md);
+  padding: 0 var(--hui-space-md);
+  border: 1px solid var(--hui-border);
+  border-radius: var(--hui-radius);
+  background: transparent;
+  color: var(--hui-text);
+  font: inherit;
+  font-size: var(--hui-font-sm);
+  cursor: pointer;
+  transition: border-color var(--hui-transition-fast), color var(--hui-transition-fast), background var(--hui-transition-fast);
+}
+
+.tt__btn--icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hui-size-md);
+  padding: 0;
+  font-size: 1rem;
+}
+
+.tt__btn:hover {
+  border-color: var(--hui-primary);
+  color: var(--hui-primary);
+}
+
+.tt__btn:focus-visible,
+.tt__view:focus-visible,
+.tt__head-btn:focus-visible {
+  outline: 2px solid var(--hui-border-focus, var(--hui-primary));
+  outline-offset: 1px;
+}
+
+.tt__title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: var(--hui-font-lg);
+  font-weight: var(--hui-font-weight-semibold);
+}
+
+.tt__views {
+  display: inline-flex;
+}
+
+.tt__view {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.tt__view:first-child {
+  margin-left: 0;
+  border-radius: var(--hui-radius) 0 0 var(--hui-radius);
+}
+
+.tt__view:last-child {
+  border-radius: 0 var(--hui-radius) var(--hui-radius) 0;
+}
+
+.tt__view[aria-pressed='true'] {
+  position: relative;
+  background: var(--hui-primary);
+  border-color: var(--hui-primary);
+  color: var(--hui-text-inverse);
+}
+
+.tt__view[aria-pressed='false']:hover {
+  color: var(--hui-primary);
+}
+
+.tt__empty {
+  padding: var(--hui-space-xs) var(--hui-space-md);
+  border-bottom: 1px solid var(--_line);
+  background: var(--hui-fill-tertiary);
+  color: var(--hui-text-muted);
+  font-size: var(--hui-font-sm);
+  text-align: center;
+}
+
+/* === Lưới === */
+.tt__scroll {
+  position: relative;
+  max-height: var(--hui-timetable-max-height, 640px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.tt__grid {
+  display: grid;
+  grid-template-columns:
+    var(--hui-timetable-gutter, 3.5rem)
+    repeat(var(--_days, 7), minmax(var(--hui-timetable-min-column, 5.5rem), 1fr));
+  min-width: 100%;
+  width: max-content;
+}
+
+.tt__grid--day {
+  width: auto;
+}
+
+.tt__corner,
+.tt__head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--_bg);
+  border-bottom: 1px solid var(--_line);
+}
+
+.tt__corner {
+  left: 0;
+  z-index: 4;
+}
+
+.tt__head {
+  border-left: 1px solid var(--_line);
+}
+
+.tt__head-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding: var(--hui-space-xs) 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+button.tt__head-btn {
+  cursor: pointer;
+}
+
+button.tt__head-btn:hover .tt__dnum {
+  background: var(--hui-fill-secondary);
+}
+
+.tt__dow {
+  font-size: var(--hui-font-xs);
+  color: var(--hui-text-muted);
+  text-transform: uppercase;
+}
+
+.tt__dnum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: var(--hui-radius-full);
+  font-size: var(--hui-font-lg);
+  font-weight: var(--hui-font-weight-semibold);
+}
+
+.tt__head--today .tt__dow {
+  color: var(--hui-primary);
+}
+
+.tt__head--today .tt__dnum,
+.tt__head--today button.tt__head-btn:hover .tt__dnum {
+  background: var(--hui-primary);
+  color: var(--hui-text-inverse);
+}
+
+.tt__gutter {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--_bg);
+}
+
+.tt__hour {
+  position: absolute;
+  top: calc(var(--s) * var(--_hour) + 2px);
+  right: 6px;
+  font-size: var(--hui-font-xs);
+  color: var(--hui-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tt__gutter,
+.tt__col {
+  height: calc(var(--_hours, 15) * var(--_hour));
+}
+
+.tt__col {
+  position: relative;
+  border-left: 1px solid var(--_line);
+  background-image:
+    linear-gradient(to bottom, var(--_line) 1px, transparent 1px),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), color-mix(in srgb, var(--_line) 55%, transparent) calc(50% - 0.5px), color-mix(in srgb, var(--_line) 55%, transparent) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  background-size: 100% var(--_hour);
+}
+
+.tt__col--today {
+  background-color: var(--hui-timetable-today-bg, var(--hui-fill-tertiary));
+}
+
+:host([selectable]) .tt__col {
+  cursor: pointer;
+  touch-action: pan-x pan-y;
+  user-select: none;
+}
+
+/* === Sự kiện === */
+.tt__event {
+  --_c: var(--hui-primary);
+  position: absolute;
+  top: calc(var(--s) * var(--_hour) + 1px);
+  left: calc(2px + (100% - 6px) * var(--c, 0) / var(--n, 1));
+  width: calc((100% - 6px) / var(--n, 1) - 2px);
+  height: calc(var(--d) * var(--_hour) - 2px);
+  min-height: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1px;
+  padding: 3px 6px;
+  overflow: hidden;
+  border: 0;
+  border-left: 3px solid var(--_c);
+  border-radius: var(--hui-radius-sm);
+  background: color-mix(in srgb, var(--_c) 14%, var(--_bg));
+  color: var(--hui-text);
+  font: inherit;
+  font-size: var(--hui-font-xs);
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+  z-index: 1;
+  transition: background var(--hui-transition-fast), box-shadow var(--hui-transition-fast);
+}
+
+.tt__event:hover {
+  z-index: 2;
+  background: color-mix(in srgb, var(--_c) 24%, var(--_bg));
+  box-shadow: var(--hui-shadow-md);
+}
+
+.tt__event:focus-visible {
+  z-index: 2;
+  outline: 2px solid var(--_c);
+  outline-offset: 1px;
+}
+
+.tt__event-title,
+.tt__event-time,
+.tt__event-sub {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tt__event-title {
+  font-weight: var(--hui-font-weight-semibold);
+  color: color-mix(in srgb, var(--_c) 45%, var(--hui-text));
+}
+
+.tt__event-time,
+.tt__event-sub {
+  color: var(--hui-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tt__event--short {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.tt__event--short .tt__event-title {
+  flex: 0 1 auto;
+}
+
+.tt__event--short .tt__event-sub {
+  display: none;
+}
+
+.tt__event--cancelled {
+  border-left-style: dashed;
+  background: var(--hui-fill-tertiary);
+  opacity: 0.7;
+}
+
+.tt__event--cancelled .tt__event-title {
+  text-decoration: line-through;
+  color: var(--hui-text-muted);
+}
+
+/* === Bây giờ / khung đang chọn === */
+.tt__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--s) * var(--_hour));
+  height: 2px;
+  margin-top: -1px;
+  background: var(--hui-timetable-now-color, var(--hui-danger));
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tt__now::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.tt__selection {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: calc(var(--s) * var(--_hour));
+  height: calc(var(--d) * var(--_hour));
+  box-sizing: border-box;
+  padding: 2px 6px;
+  border: 1px solid var(--hui-primary);
+  border-radius: var(--hui-radius-sm);
+  background: var(--hui-fill);
+  color: var(--hui-primary);
+  font-size: var(--hui-font-xs);
+  font-weight: var(--hui-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt__btn,
+  .tt__view,
+  .tt__event {
+    transition: none;
+  }
+}
