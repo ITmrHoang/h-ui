@@ -317,6 +317,11 @@
       "import": "./dist/hui-filter-chips.esm.js",
       "default": "./dist/hui-filter-chips.esm.js"
     },
+    "./hui-flashcard": {
+      "types": "./dist/types/hui-flashcard.d.ts",
+      "import": "./dist/hui-flashcard.esm.js",
+      "default": "./dist/hui-flashcard.esm.js"
+    },
     "./hui-flex": {
       "types": "./dist/types/hui-flex.d.ts",
       "import": "./dist/hui-flex.esm.js",

@@ -52,7 +52,7 @@ export const CDN_GROUPS = {
     'hui-typewriter', 'hui-video',
   ],
   // Học tập: công thức, nội dung bài học / câu hỏi
-  learning: ['hui-markdown', 'hui-math'],
+  learning: ['hui-flashcard', 'hui-markdown', 'hui-math'],
   // Thương mại điện tử
   shop: [
     'hui-add-to-cart', 'hui-cart-drawer', 'hui-coupon-input', 'hui-free-ship-bar', 'hui-image-zoom', 'hui-price',

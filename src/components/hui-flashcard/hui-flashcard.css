@@ -1,0 +1,208 @@
+/*
+ * HUI Flashcard — biến override:
+ *   --hui-flashcard-min-height  Chiều cao tối thiểu (220px)
+ *   --hui-flashcard-bg          Nền mặt trước
+ *   --hui-flashcard-back-bg     Nền mặt sau
+ *   --hui-flashcard-radius      Bo góc
+ *   --hui-flashcard-font-size   Cỡ chữ nội dung
+ * Parts: base, face, front, back, hint, ratings, rating, rating-again | rating-hard | rating-good | rating-easy
+ */
+
+:host {
+  display: block;
+  font-family: var(--hui-font-family);
+  color: var(--hui-text);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.card {
+  perspective: 1200px;
+  cursor: pointer;
+  border-radius: var(--hui-flashcard-radius, var(--hui-radius-lg));
+  outline: none;
+}
+
+.card:focus-visible {
+  box-shadow: 0 0 0 3px var(--hui-fill, rgba(8, 100, 173, 0.18));
+}
+
+:host([disabled]) .card {
+  cursor: default;
+}
+
+.inner {
+  display: grid;
+  min-height: var(--hui-flashcard-min-height, 220px);
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.card--flipped .inner {
+  transform: rotateY(180deg);
+}
+
+.inner--instant {
+  transition: none !important;
+}
+
+/* Hai mặt chồng cùng một ô lưới → thẻ cao bằng mặt dài hơn */
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hui-space-sm);
+  box-sizing: border-box;
+  padding: var(--hui-space-xl) var(--hui-space-xl) var(--hui-space-lg);
+  border: 1px solid var(--hui-border-secondary, var(--hui-border));
+  border-radius: var(--hui-flashcard-radius, var(--hui-radius-lg));
+  background: var(--hui-flashcard-bg, var(--hui-bg-container, var(--hui-surface)));
+  box-shadow: var(--hui-shadow-md);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.face--back {
+  transform: rotateY(180deg);
+  background: var(--hui-flashcard-back-bg, color-mix(in srgb, var(--hui-primary) 6%, var(--hui-bg-container, var(--hui-surface))));
+  border-color: color-mix(in srgb, var(--hui-primary) 30%, var(--hui-border-secondary, var(--hui-border)));
+}
+
+.side {
+  font-size: var(--hui-font-xs);
+  font-weight: var(--hui-font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--hui-text-muted);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: var(--hui-flashcard-font-size, var(--hui-font-lg));
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  margin: var(--hui-space-sm) 0 0;
+  text-align: center;
+  font-size: var(--hui-font-sm);
+  color: var(--hui-text-muted);
+}
+
+.ratings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--hui-space-sm);
+  margin-top: var(--hui-space-md);
+}
+
+.rate {
+  --_c: var(--hui-primary);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 3.25rem;
+  padding: var(--hui-space-sm) var(--hui-space-xs);
+  border: 1px solid color-mix(in srgb, var(--_c) 45%, transparent);
+  border-radius: var(--hui-radius-md);
+  background: color-mix(in srgb, var(--_c) 10%, var(--hui-bg-container, var(--hui-surface)));
+  color: var(--hui-text);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--hui-transition-fast), transform var(--hui-transition-fast);
+}
+
+.rate:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--_c) 20%, var(--hui-bg-container, var(--hui-surface)));
+}
+
+.rate:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.rate:focus-visible {
+  outline: 2px solid var(--_c);
+  outline-offset: 1px;
+}
+
+.rate:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.rate--again {
+  --_c: var(--hui-danger);
+}
+
+.rate--hard {
+  --_c: var(--hui-warning);
+}
+
+.rate--good {
+  --_c: var(--hui-success);
+}
+
+.rate--easy {
+  --_c: var(--hui-info);
+}
+
+.rate-label {
+  font-weight: var(--hui-font-weight-semibold);
+  color: color-mix(in srgb, var(--_c) 55%, var(--hui-text));
+}
+
+.rate-hint {
+  font-size: var(--hui-font-xs);
+  color: var(--hui-text-secondary);
+}
+
+.rate-key {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font: inherit;
+  font-size: 0.6875rem;
+  color: var(--hui-text-muted);
+}
+
+@media (max-width: 480px) {
+  .face {
+    padding: var(--hui-space-lg);
+  }
+
+  .ratings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inner {
+    transition: none;
+  }
+
+  /* Không xoay 3D: chỉ ẩn / hiện mặt */
+  .card--flipped .inner {
+    transform: none;
+  }
+
+  .face--back {
+    transform: none;
+    visibility: hidden;
+  }
+
+  .card--flipped .face--back {
+    visibility: visible;
+  }
+
+  .card--flipped .face--front {
+    visibility: hidden;
+  }
+}
