@@ -947,6 +947,11 @@
       "import": "./dist/hui-watermark.esm.js",
       "default": "./dist/hui-watermark.esm.js"
     },
+    "./hui-whiteboard": {
+      "types": "./dist/types/hui-whiteboard.d.ts",
+      "import": "./dist/hui-whiteboard.esm.js",
+      "default": "./dist/hui-whiteboard.esm.js"
+    },
     "./hui-wishlist-toggle": {
       "types": "./dist/types/hui-wishlist-toggle.d.ts",
       "import": "./dist/hui-wishlist-toggle.esm.js",
