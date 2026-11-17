@@ -1,0 +1,102 @@
+/*
+ * HUI Plot — biến override:
+ *   --hui-plot-height  Chiều cao khung đồ thị (320px)
+ * Parts: canvas, controls, sliders
+ */
+
+:host {
+  display: block;
+  font-family: var(--hui-font-family);
+  color: var(--hui-text);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.stage {
+  position: relative;
+  height: var(--hui-plot-height, 320px);
+  overflow: hidden;
+  border: 1px solid var(--hui-border-secondary, var(--hui-border));
+  border-radius: var(--hui-radius-md);
+  background: #fff;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+canvas:active {
+  cursor: grabbing;
+}
+
+.controls {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--hui-border);
+  border-radius: var(--hui-radius-sm);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--hui-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--hui-primary);
+  color: var(--hui-primary);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--hui-primary);
+  outline-offset: 1px;
+}
+
+.sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hui-space-xs) var(--hui-space-lg);
+  margin-top: var(--hui-space-xs);
+}
+
+.slider {
+  display: inline-flex;
+  gap: var(--hui-space-xs);
+  align-items: center;
+  font-size: var(--hui-font-sm);
+}
+
+.slider .name {
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.slider input {
+  width: 140px;
+  accent-color: var(--hui-primary);
+}
+
+.slider output {
+  min-width: 3.5em;
+  color: var(--hui-text-secondary);
+}
+
+.errors {
+  margin-top: var(--hui-space-xs);
+  font-size: var(--hui-font-sm);
+  color: var(--hui-danger);
+}

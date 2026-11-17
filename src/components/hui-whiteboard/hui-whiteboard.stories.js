@@ -15,7 +15,8 @@ export default {
       description: {
         component: `
 **HUI Whiteboard** — Bảng vẽ cho dạy trực tuyến: **bút, bút dạ quang, tẩy, đoạn thẳng, mũi tên, hình chữ nhật,
-elip, chữ**; màu + độ dày; **hoàn tác / làm lại** (Ctrl + Z / Ctrl + Y); **nhiều trang**; xuất ảnh PNG.
+elip, chữ, đồ thị hàm số** (công cụ ƒ: kéo khung → gõ \`y = 2x + 1\`…, Ctrl + Enter; chạm lại để sửa); màu + độ dày;
+**hoàn tác / làm lại** (Ctrl + Z / Ctrl + Y); **nhiều trang**; xuất ảnh PNG.
 
 Zero-dependency: component lo vẽ (Canvas 2D) + công cụ + dữ liệu; mỗi thay đổi phát \`hui-change\` kèm **thao tác**
 để app gửi cho máy khác (LiveKit data, WebSocket, Yjs…), máy kia gọi \`applyRemote(op)\`. Tọa độ chuẩn hóa theo
@@ -34,7 +35,7 @@ trang **1600 × 900** nên mọi màn hình thấy giống nhau.
 | Attribute | Property | Type | Default | Mô tả |
 |-----------|----------|------|---------|-------|
 | \`readonly\` | \`readonly\` | boolean | \`false\` | Chỉ xem (không vẽ, ẩn thanh công cụ) |
-| \`tool\` | \`tool\` | string | \`'pen'\` | pen · highlighter · eraser · line · arrow · rect · ellipse · text |
+| \`tool\` | \`tool\` | string | \`'pen'\` | pen · highlighter · eraser · line · arrow · rect · ellipse · text · plot |
 | \`color\` | \`color\` | string | \`'#111827'\` | Màu nét |
 | \`size\` | \`size\` | number | \`4\` | Độ dày nét (chữ: cỡ 16 + size × 4) |
 | \`author\` | \`author\` | string | \`''\` | Gắn vào phần tử mới vẽ |
@@ -50,13 +51,14 @@ trang **1600 × 900** nên mọi màn hình thấy giống nhau.
 | \`undo()\` / \`redo()\` | Hoàn tác / làm lại thao tác của chính mình |
 | \`clearPage()\` / \`addPage()\` | Xóa trang đang xem / thêm trang |
 | \`getSnapshot()\` / \`loadSnapshot(s)\` | Toàn bộ bảng \`{ pages, page }\` (gửi người vào sau, lưu lại) |
+| \`addPlot(value, box?)\` | Thêm đồ thị hàm số (cú pháp của \`hui-plot\`), trả về id |
 | \`elements(page?)\` | Phần tử của một trang |
 | \`toDataURL(page?, type?)\` | Ảnh 1600 × 900 của một trang |
 
 ### Events
 | Event | Detail | Mô tả |
 |-------|--------|-------|
-| \`hui-change\` | \`{ op }\` | \`add { page, elements }\` · \`remove { page, ids }\` · \`clear { page }\` · \`page-add\` |
+| \`hui-change\` | \`{ op }\` | \`add { page, elements }\` · \`remove { page, ids }\` · \`update { page, element }\` · \`clear { page }\` · \`page-add\` |
 | \`hui-page\` | \`{ page }\` | Người dùng chuyển trang |
 `,
       },

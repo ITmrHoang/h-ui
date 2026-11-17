@@ -239,4 +239,5 @@ export { default as HuiMath, latexToMathML } from './components/hui-math/index.j
 export { default as HuiMarkdown, renderMarkdown } from './components/hui-markdown/index.js';
 export { default as HuiFlashcard } from './components/hui-flashcard/index.js';
 export { default as HuiWhiteboard } from './components/hui-whiteboard/index.js';
+export { default as HuiPlot, parsePlot, evaluate as evaluateExpression } from './components/hui-plot/index.js';
 export { default as HuiVirtualList } from './components/hui-virtual-list/index.js';

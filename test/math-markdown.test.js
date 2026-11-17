@@ -131,6 +131,13 @@ describe('renderMarkdown', () => {
     expect(d.querySelector('hr')).toBeTruthy();
   });
 
+  it('khối ```plot thành <hui-plot>, bên trong giữ khối code dự phòng', () => {
+    const d = render('Đồ thị:\n\n```plot\ny = 2x + 1\nA(0; 1)\n```');
+    const plot = d.querySelector('hui-plot');
+    expect(plot.getAttribute('value')).toBe('y = 2x + 1\nA(0; 1)');
+    expect(plot.querySelector('pre code[data-lang="plot"]').textContent).toBe('y = 2x + 1\nA(0; 1)');
+  });
+
   it('an toàn: HTML hiện như chữ, link / ảnh nguy hiểm bị bỏ', () => {
     const d = render('<script>alert(1)</script> [x](javascript:alert(1)) ![a](javascript:x) ![b](https://e.com/a.png) [ok](/bai-hoc)');
     expect(d.querySelector('script')).toBeNull();

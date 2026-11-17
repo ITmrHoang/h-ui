@@ -151,6 +151,25 @@ canvas {
   outline: none;
 }
 
+.plot-input {
+  position: absolute;
+  box-sizing: border-box;
+  min-height: 84px;
+  padding: 6px 8px;
+  border: 1px solid var(--hui-primary);
+  border-radius: var(--hui-radius-sm);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--hui-shadow-md, 0 4px 12px rgb(0 0 0 / 12%));
+  color: var(--hui-text);
+  font: 14px/1.5 var(--hui-font-mono, ui-monospace, Consolas, monospace);
+  resize: vertical;
+  outline: none;
+}
+
+.stage[data-tool='plot'] canvas {
+  cursor: crosshair;
+}
+
 @media (max-width: 480px) {
   .btn {
     min-width: 28px;

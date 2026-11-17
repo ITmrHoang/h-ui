@@ -115,6 +115,51 @@ describe('hui-whiteboard', () => {
     expect(input.hidden).toBe(true);
   });
 
+  it('công cụ đồ thị: kéo khung → gõ công thức → vẽ; chạm lại để sửa (op update), hoàn tác được', async () => {
+    const a = await mount({ author: 'gv' });
+    const b = await mount({ readonly: '' });
+    const ops = [];
+    a.addEventListener('hui-change', (e) => {
+      ops.push(e.detail.op);
+      b.applyRemote(e.detail.op);
+    });
+    a.tool = 'plot';
+    await tick();
+    drag(a, [[100, 100], [700, 500]]);
+    const input = a.shadowRoot.querySelector('.plot-input');
+    expect(input.hidden).toBe(false);
+    input.focus();
+    input.value = 'y = x^2 - 2\nA(1; -1)';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+    input.dispatchEvent(new FocusEvent('blur'));
+    expect(ops.length).toBe(1);
+    const [plot] = a.elements();
+    expect(plot).toMatchObject({ type: 'plot', x1: 100, y1: 100, x2: 700, y2: 500, value: 'y = x^2 - 2\nA(1; -1)', author: 'gv' });
+    expect(b.elements()).toEqual(a.elements());
+
+    // Chạm vào đồ thị → sửa công thức
+    drag(a, [[400, 300]]);
+    expect(input.hidden).toBe(false);
+    expect(input.value).toBe('y = x^2 - 2\nA(1; -1)');
+    input.value = 'y = 2x';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+    expect(ops[1]).toMatchObject({ kind: 'update', page: 0, element: { id: plot.id, value: 'y = 2x' } });
+    expect(b.elements()[0].value).toBe('y = 2x');
+    a.undo();
+    expect(a.elements()[0].value).toBe('y = x^2 - 2\nA(1; -1)');
+    expect(b.elements()[0].value).toBe('y = x^2 - 2\nA(1; -1)');
+
+    // Chỉ chạm chỗ trống: khung mặc định 640 × 400 không tràn trang; addPlot() khi app tự thêm
+    drag(a, [[1500, 800]]);
+    input.value = 'y = sin x';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true }));
+    expect(a.elements()[1]).toMatchObject({ x1: 960, y1: 500, x2: 1600, y2: 900 });
+    const id = a.addPlot('y = 1/x');
+    expect(a.elements()[2]).toMatchObject({ id, x1: 480, y1: 250, value: 'y = 1/x' });
+    expect(a.toDataURL(0).length).toBeGreaterThan(1000);
+    expect(hitTest(a.elements()[0], [120, 120])).toBe(true);
+  });
+
   it('kiểm tra chạm của tẩy theo loại phần tử', () => {
     expect(hitTest({ type: 'line', size: 4, x1: 0, y1: 0, x2: 100, y2: 0 }, [50, 8])).toBe(true);
     expect(hitTest({ type: 'line', size: 4, x1: 0, y1: 0, x2: 100, y2: 0 }, [50, 30])).toBe(false);

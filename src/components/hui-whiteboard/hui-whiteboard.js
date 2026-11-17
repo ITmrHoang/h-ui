@@ -16,6 +16,7 @@ import styles from './hui-whiteboard.css?raw';
 import { HuiElement, defineElement } from '../../core/hui-element.js';
 import { getLocaleName, t } from '../../core/locale.js';
 import { createElement } from '../../utils/dom.js';
+import { drawPlot, fitView, parsePlot } from '../hui-plot/plot-core.js';
 
 const FALLBACK = {
   'whiteboard.label': { vi: 'Bảng', en: 'Whiteboard' },
@@ -27,6 +28,11 @@ const FALLBACK = {
   'whiteboard.rect': { vi: 'Hình chữ nhật', en: 'Rectangle' },
   'whiteboard.ellipse': { vi: 'Elip', en: 'Ellipse' },
   'whiteboard.text': { vi: 'Chữ', en: 'Text' },
+  'whiteboard.plot': { vi: 'Đồ thị hàm số', en: 'Function graph' },
+  'whiteboard.plotPlaceholder': {
+    vi: 'Mỗi dòng một đồ thị: y = 2x + 1, y = x^2, A(1; 2)… — Ctrl + Enter để vẽ',
+    en: 'One graph per line: y = 2x + 1, y = x^2, A(1; 2)… — Ctrl + Enter to draw',
+  },
   'whiteboard.color': { vi: 'Màu', en: 'Color' },
   'whiteboard.size': { vi: 'Độ dày', en: 'Size' },
   'whiteboard.undo': { vi: 'Hoàn tác', en: 'Undo' },
@@ -46,11 +52,13 @@ const msg = (key) => {
 
 export const PAGE_WIDTH = 1600;
 export const PAGE_HEIGHT = 900;
-export const TOOLS = ['pen', 'highlighter', 'eraser', 'line', 'arrow', 'rect', 'ellipse', 'text'];
-const TOOL_ICONS = { pen: '✎', highlighter: '▌', eraser: '⌫', line: '╱', arrow: '➚', rect: '▭', ellipse: '◯', text: 'T' };
+export const TOOLS = ['pen', 'highlighter', 'eraser', 'line', 'arrow', 'rect', 'ellipse', 'text', 'plot'];
+const TOOL_ICONS = { pen: '✎', highlighter: '▌', eraser: '⌫', line: '╱', arrow: '➚', rect: '▭', ellipse: '◯', text: 'T', plot: 'ƒ' };
 const DEFAULT_PALETTE = ['#111827', '#dc2626', '#2563eb', '#16a34a', '#d97706', '#7c3aed'];
 const SIZES = [2, 4, 8, 14];
 const SHAPES = ['line', 'arrow', 'rect', 'ellipse'];
+/** Khung đồ thị mặc định khi chỉ chạm (không kéo) */
+const PLOT_BOX = { w: 640, h: 400 };
 
 let seq = 0;
 const newId = () => `${Date.now().toString(36)}${(++seq).toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -93,6 +101,11 @@ function segmentsOf(el) {
 
 /** Điểm p có chạm phần tử không (bán kính `r` theo đơn vị trang). */
 export function hitTest(el, p, r = 10) {
+  if (el.type === 'plot') {
+    const [x1, x2] = [Math.min(el.x1, el.x2), Math.max(el.x1, el.x2)];
+    const [y1, y2] = [Math.min(el.y1, el.y2), Math.max(el.y1, el.y2)];
+    return p[0] >= x1 - r && p[0] <= x2 + r && p[1] >= y1 - r && p[1] <= y2 + r;
+  }
   if (el.type === 'text') {
     const lines = String(el.text).split('\n');
     const w = Math.max(...lines.map((l) => l.length)) * el.size * 0.6;
@@ -103,7 +116,47 @@ export function hitTest(el, p, r = 10) {
   return segmentsOf(el).some(([a, b]) => distToSegment(p, a, b) <= reach);
 }
 
+/** Kết quả phân tích công thức theo nội dung (bảng vẽ lại liên tục khi đang kéo nét khác). */
+const plotCache = new Map();
+function parsedPlot(value) {
+  let plot = plotCache.get(value);
+  if (!plot) {
+    plot = parsePlot(value);
+    if (plotCache.size > 50) plotCache.delete(plotCache.keys().next().value);
+    plotCache.set(value, plot);
+  }
+  return plot;
+}
+
+/** Đồ thị trên bảng: khung trục theo dòng `x: … / y: …`; thiếu y thì đơn vị hai trục bằng nhau, gốc ở giữa. */
+function drawPlotElement(ctx, el) {
+  const x = Math.min(el.x1, el.x2);
+  const y = Math.min(el.y1, el.y2);
+  const w = Math.abs(el.x2 - el.x1);
+  const h = Math.abs(el.y2 - el.y1);
+  if (w < 2 || h < 2) return;
+  const plot = parsedPlot(el.value ?? '');
+  drawPlot(ctx, plot, fitView(plot.view, h / w), { x, y, w, h, font: 18, background: '#ffffff' });
+  ctx.strokeStyle = '#9ca3af';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x, y, w, h);
+}
+
 function drawElement(ctx, el) {
+  if (el.type === 'plot') {
+    ctx.save();
+    if (el.value) {
+      drawPlotElement(ctx, el);
+    } else {
+      // Khung đang kéo / đang gõ công thức
+      ctx.setLineDash([10, 8]);
+      ctx.strokeStyle = '#6b7280';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(Math.min(el.x1, el.x2), Math.min(el.y1, el.y2), Math.abs(el.x2 - el.x1), Math.abs(el.y2 - el.y1));
+    }
+    ctx.restore();
+    return;
+  }
   ctx.save();
   ctx.strokeStyle = el.color;
   ctx.fillStyle = el.color;
@@ -169,7 +222,8 @@ function drawElement(ctx, el) {
  * Bảng vẽ.
  *
  * @fires hui-change - Bảng thay đổi do người dùng (vẽ, tẩy, xóa trang, hoàn tác, thêm trang). detail: { op }
- *   op = { kind: 'add', page, elements } | { kind: 'remove', page, ids } | { kind: 'clear', page } | { kind: 'page-add' }
+ *   op = { kind: 'add', page, elements } | { kind: 'remove', page, ids } | { kind: 'update', page, element }
+ *        | { kind: 'clear', page } | { kind: 'page-add' }
  * @fires hui-page - Người dùng chuyển trang. detail: { page }
  *
  * @csspart toolbar - Thanh công cụ
@@ -185,7 +239,7 @@ class HuiWhiteboard extends HuiElement {
   static properties = {
     /** Chỉ xem (không vẽ, ẩn thanh công cụ) */
     readonly: { type: Boolean, reflect: true },
-    /** pen | highlighter | eraser | line | arrow | rect | ellipse | text */
+    /** pen | highlighter | eraser | line | arrow | rect | ellipse | text | plot */
     tool: { type: String, default: 'pen' },
     color: { type: String, default: '#111827' },
     /** Độ dày nét (đơn vị trang 1600 × 900); chữ dùng cỡ chữ = 16 + size × 4 */
@@ -258,6 +312,9 @@ class HuiWhiteboard extends HuiElement {
       } else if (op.kind === 'remove') {
         const ids = new Set(op.ids ?? []);
         this._pages[op.page] = list.filter((e) => !ids.has(e.id));
+      } else if (op.kind === 'update' && op.element) {
+        const i = list.findIndex((e) => e.id === op.element.id);
+        if (i >= 0) list[i] = clone(op.element);
       } else if (op.kind === 'clear') {
         this._pages[op.page] = [];
       }
@@ -304,6 +361,26 @@ class HuiWhiteboard extends HuiElement {
   addPage() {
     this._commit({ kind: 'page-add' });
     this._goto(this._pages.length - 1);
+  }
+
+  /**
+   * Thêm đồ thị hàm số vào trang đang xem (như dùng công cụ ƒ).
+   * @param {string} value - công thức, mỗi dòng một đồ thị (cú pháp của hui-plot)
+   * @param {{ x1, y1, x2, y2 }} [box] - khung theo tọa độ trang; mặc định 640 × 400 giữa trang
+   * @returns {string|null} id phần tử
+   */
+  addPlot(value, box = null) {
+    const text = String(value ?? '').trim();
+    if (!text) return null;
+    const b = box ?? {
+      x1: (PAGE_WIDTH - PLOT_BOX.w) / 2,
+      y1: (PAGE_HEIGHT - PLOT_BOX.h) / 2,
+      x2: (PAGE_WIDTH + PLOT_BOX.w) / 2,
+      y2: (PAGE_HEIGHT + PLOT_BOX.h) / 2,
+    };
+    const el = { id: newId(), type: 'plot', x1: b.x1, y1: b.y1, x2: b.x2, y2: b.y2, value: text, color: this.color, size: 0, author: this.author };
+    this._commit({ kind: 'add', page: this.page, elements: [el] }, { kind: 'remove', page: this.page, ids: [el.id] });
+    return el.id;
   }
 
   _goto(page) {
@@ -357,7 +434,14 @@ class HuiWhiteboard extends HuiElement {
 
     this._canvas = createElement('canvas', { part: 'canvas' });
     this._textInput = createElement('input', { type: 'text', className: 'text-input', hidden: true });
-    this._stage = createElement('div', { className: 'stage', part: 'stage', tabindex: '0' }, this._canvas, this._textInput);
+    this._plotInput = createElement('textarea', { className: 'plot-input', hidden: true, rows: '4', spellcheck: 'false' });
+    this._stage = createElement(
+      'div',
+      { className: 'stage', part: 'stage', tabindex: '0' },
+      this._canvas,
+      this._textInput,
+      this._plotInput,
+    );
 
     this._toolbar.addEventListener('click', (e) => this._onToolbar(e));
     this._sizeSelect.addEventListener('change', () => {
@@ -373,6 +457,12 @@ class HuiWhiteboard extends HuiElement {
       e.stopPropagation();
     });
     this._textInput.addEventListener('blur', () => this._commitText());
+    this._plotInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) this._commitPlot();
+      if (e.key === 'Escape') this._closePlot();
+      e.stopPropagation();
+    });
+    this._plotInput.addEventListener('blur', () => this._commitPlot());
     this._stage.addEventListener('keydown', (e) => this._onKey(e));
     return [this._toolbar, this._stage];
   }
@@ -405,6 +495,7 @@ class HuiWhiteboard extends HuiElement {
       }
       this._draft = null;
       this._closeText();
+      this._closePlot();
       this._paint();
     }
     if (changed.has('background')) this._paint();
@@ -455,6 +546,8 @@ class HuiWhiteboard extends HuiElement {
     }
     this._pageLabel.textContent = `${this.page + 1} / ${this._pages.length}`;
     this._textInput.placeholder = msg('whiteboard.textPlaceholder');
+    this._plotInput.placeholder = msg('whiteboard.plotPlaceholder');
+    this._plotInput.setAttribute('aria-label', msg('whiteboard.plot'));
   }
 
   _onToolbar(e) {
@@ -527,6 +620,14 @@ class HuiWhiteboard extends HuiElement {
     } else if (this.tool === 'text') {
       this._openText(p);
       return;
+    } else if (this.tool === 'plot') {
+      // Chạm vào đồ thị có sẵn → sửa công thức; chỗ trống → kéo khung mới
+      const hit = [...(this._pages[this.page] ?? [])].reverse().find((el) => el.type === 'plot' && hitTest(el, p, 0));
+      if (hit) {
+        this._openPlot(hit);
+        return;
+      }
+      this._draft = { ...base, type: 'plot', size: 0, value: '', x1: p[0], y1: p[1], x2: p[0], y2: p[1] };
     }
     this._paint();
   }
@@ -566,6 +667,23 @@ class HuiWhiteboard extends HuiElement {
     const draft = this._draft;
     this._draft = null;
     if (!draft) return;
+    if (draft.type === 'plot') {
+      if (Math.abs(draft.x2 - draft.x1) < 40 || Math.abs(draft.y2 - draft.y1) < 40) {
+        // Chỉ chạm: khung mặc định tại điểm chạm, không tràn khỏi trang
+        const x1 = Math.min(draft.x1, PAGE_WIDTH - PLOT_BOX.w);
+        const y1 = Math.min(draft.y1, PAGE_HEIGHT - PLOT_BOX.h);
+        Object.assign(draft, { x1, y1, x2: x1 + PLOT_BOX.w, y2: y1 + PLOT_BOX.h });
+      } else {
+        Object.assign(draft, {
+          x1: Math.min(draft.x1, draft.x2),
+          y1: Math.min(draft.y1, draft.y2),
+          x2: Math.max(draft.x1, draft.x2),
+          y2: Math.max(draft.y1, draft.y2),
+        });
+      }
+      this._openPlot(draft);
+      return;
+    }
     if (!draft.points && Math.hypot(draft.x2 - draft.x1, draft.y2 - draft.y1) < 3) {
       this._paint();
       return;
@@ -607,6 +725,58 @@ class HuiWhiteboard extends HuiElement {
     this._textPoint = null;
     this._textInput.value = '';
     this._textInput.hidden = true;
+  }
+
+  /** Ô nhập công thức phủ lên khung đồ thị (khung mới vẽ hoặc đồ thị có sẵn đang sửa). */
+  _openPlot(el) {
+    this._closeText();
+    this._plotEl = el;
+    const rect = this._canvas.getBoundingClientRect();
+    const scale = rect.width / PAGE_WIDTH || 1;
+    Object.assign(this._plotInput.style, {
+      left: `${Math.min(el.x1, el.x2) * scale}px`,
+      top: `${Math.min(el.y1, el.y2) * scale}px`,
+      width: `${Math.max(240, Math.abs(el.x2 - el.x1) * scale)}px`,
+    });
+    this._plotInput.value = el.value ?? '';
+    this._plotInput.hidden = false;
+    // Khung mới (chưa có công thức) hiện nét đứt trong lúc gõ
+    this._draft = el.value ? null : el;
+    this._paint();
+    this._plotInput.focus();
+    requestAnimationFrame(() => this._plotInput.focus());
+  }
+
+  _closePlot() {
+    if (!this._plotInput) return;
+    // Như _closeText: xóa trạng thái TRƯỚC khi ẩn (ẩn ô đang focus phát `blur` → _commitPlot chạy lại)
+    this._plotEl = null;
+    this._plotInput.value = '';
+    this._plotInput.hidden = true;
+    if (this._draft?.type === 'plot') {
+      this._draft = null;
+      this._paint();
+    }
+  }
+
+  _commitPlot() {
+    const value = this._plotInput?.value.trim();
+    const el = this._plotEl;
+    this._closePlot();
+    if (!el) return;
+    const existing = (this._pages[this.page] ?? []).find((e) => e.id === el.id);
+    if (!existing) {
+      if (value) this.addPlot(value, el);
+      return;
+    }
+    if (value === existing.value) return;
+    if (!value) {
+      // Xóa hết công thức = xóa đồ thị
+      this._commit({ kind: 'remove', page: this.page, ids: [el.id] }, { kind: 'add', page: this.page, elements: [clone(existing)] });
+      return;
+    }
+    const next = { ...clone(existing), value };
+    this._commit({ kind: 'update', page: this.page, element: next }, { kind: 'update', page: this.page, element: clone(existing) });
   }
 
   _commitText() {

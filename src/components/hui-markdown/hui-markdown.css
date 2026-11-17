@@ -36,8 +36,14 @@ ul,
 ol,
 blockquote,
 pre,
+hui-plot,
 .md-table {
   margin: 0 0 0.75em;
+}
+
+hui-plot {
+  display: block;
+  max-width: 640px;
 }
 
 h1,

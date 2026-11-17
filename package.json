@@ -592,6 +592,11 @@
       "import": "./dist/hui-phone-input.esm.js",
       "default": "./dist/hui-phone-input.esm.js"
     },
+    "./hui-plot": {
+      "types": "./dist/types/hui-plot.d.ts",
+      "import": "./dist/hui-plot.esm.js",
+      "default": "./dist/hui-plot.esm.js"
+    },
     "./hui-popconfirm": {
       "types": "./dist/types/hui-popconfirm.d.ts",
       "import": "./dist/hui-popconfirm.esm.js",

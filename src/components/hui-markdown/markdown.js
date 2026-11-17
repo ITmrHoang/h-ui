@@ -2,7 +2,8 @@
  * Markdown rút gọn → DOM (không dùng innerHTML, HTML trong nội dung hiện như chữ thường — an toàn XSS).
  *
  * Khối: tiêu đề `#`…`######`, đoạn văn (xuống dòng giữ nguyên), danh sách `-` `*` `+` / `1.` `1)` (lồng nhau
- * theo thụt lề), trích dẫn `>`, khối code ```, đường kẻ `---`, bảng `| a | b |`, công thức khối `$$ … $$`.
+ * theo thụt lề), trích dẫn `>`, khối code ```, đường kẻ `---`, bảng `| a | b |`, công thức khối `$$ … $$`,
+ * đồ thị ```plot … ``` (→ <hui-plot>).
  * Trong dòng: **đậm**, *nghiêng*, ~~gạch~~, `code`, [link](url), ![ảnh](url), công thức `$…$`, `\$` = dấu $.
  * Link chỉ nhận http(s), mailto, đường dẫn tương đối; ảnh nhận thêm data:image/*.
  */
@@ -182,6 +183,12 @@ function parseLines(lines, opts) {
       i++;
       while (i < lines.length && !lines[i].trim().startsWith(fence[1])) body.push(lines[i++]);
       i++;
+      if (fence[2] === 'plot') {
+        // Đồ thị hàm số → <hui-plot> (app import hui-plot); chưa có component thì hiện khối code bên trong
+        const src = body.join('\n');
+        out.push(h('hui-plot', { value: src }, h('pre', null, h('code', { 'data-lang': 'plot' }, src))));
+        continue;
+      }
       out.push(h('pre', null, h('code', { 'data-lang': fence[2] || undefined }, body.join('\n'))));
       continue;
     }
