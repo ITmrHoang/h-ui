@@ -140,9 +140,11 @@ for (const g of OTHER) {
   }
 }
 const promoted = [...usedBy].filter(([, gs]) => gs.length > 1).map(([id]) => id).sort();
-// Module của core sau khi thêm phần được đẩy vào (kèm phụ thuộc của chúng)
+// Module của core sau khi thêm phần được đẩy vào (kèm phụ thuộc của chúng).
+// Phần được đẩy vào cũng được lộ ra ở HUI.__m ngay lúc phân tích: module chỉ có hàm thuần (vd hui-calendar/date-utils.js)
+// mà chỉ `import 'x'` thì bị tree-shake mất → core không có, nhóm nào dùng cũng tự gộp một bản.
 const coreModules = promoted.length
-  ? new Set((await buildOne({ entryCode: coreEntry(promoted, []), fileName: 'h-ui-core.min.js', write: false })).moduleIds)
+  ? new Set((await buildOne({ entryCode: coreEntry(promoted, promoted), fileName: 'h-ui-core.min.js', write: false })).moduleIds)
   : analyzed.core;
 const exposed = [...coreModules].sort();
 const exposedSet = new Set(exposed);
