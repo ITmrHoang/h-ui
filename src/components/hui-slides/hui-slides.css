@@ -1,0 +1,186 @@
+/*
+ * HUI Slides — biến override:
+ *   --hui-slides-bg         Nền slide (#fff)
+ *   --hui-slides-font-size  Cỡ chữ theo khung 1280 × 720 (30px)
+ *   --hui-slides-padding    Lề trong slide (48px 72px)
+ * Parts: viewport, controls, progress, counter
+ */
+
+:host {
+  display: block;
+  font-family: var(--hui-font-family);
+  color: var(--hui-text);
+  outline: none;
+}
+
+:host(:focus-visible) .viewport {
+  box-shadow: 0 0 0 2px var(--hui-primary);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.viewport {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--hui-border-secondary, var(--hui-border));
+  border-radius: var(--hui-radius-md);
+  background: var(--hui-slides-bg, #fff);
+  touch-action: pan-y;
+}
+
+/* Tuyệt đối: khung 1280px không đòi bề rộng tối thiểu khi hui-slides nằm trong grid/flex của trang */
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: 0 0;
+}
+
+::slotted(*) {
+  box-sizing: border-box;
+  width: 1280px;
+  height: 720px;
+  padding: var(--hui-slides-padding, 48px 72px);
+  overflow: hidden;
+  font-size: var(--hui-slides-font-size, 30px);
+  line-height: 1.45;
+  background: var(--hui-slides-bg, #fff);
+}
+
+/* Slide không xem: ẩn chắc chắn kể cả khi CSS của trang đặt display cho phần tử con */
+::slotted([hidden]) {
+  display: none !important;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--hui-text-secondary);
+}
+
+/* Xem lưới: mọi slide thu nhỏ thành ô bấm được */
+:host([overview]) .viewport {
+  aspect-ratio: auto;
+  max-height: 75vh;
+  overflow: auto;
+  background: var(--hui-bg-subtle, #f3f4f6);
+}
+
+:host([overview]) .stage {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 12px;
+  width: auto;
+  height: auto;
+  padding: 12px;
+}
+
+:host([overview]) ::slotted(*) {
+  zoom: 0.18;
+  cursor: pointer;
+  border: 6px solid transparent;
+  border-radius: 24px;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 15%);
+}
+
+:host([overview]) ::slotted([data-active]) {
+  border-color: var(--hui-primary);
+}
+
+.controls {
+  display: flex;
+  gap: var(--hui-space-xs);
+  align-items: center;
+  margin-top: var(--hui-space-xs);
+}
+
+.btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--hui-border);
+  border-radius: var(--hui-radius-sm);
+  background: var(--hui-bg, #fff);
+  color: var(--hui-text);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--hui-primary);
+  color: var(--hui-primary);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--hui-primary);
+  outline-offset: 1px;
+}
+
+.counter {
+  min-width: 4.5em;
+  text-align: center;
+  font-size: var(--hui-font-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--hui-border-secondary, var(--hui-border));
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  background: var(--hui-primary);
+  transition: width 0.2s ease;
+}
+
+/* Toàn màn hình: khung 16:9 lớn nhất vừa màn hình, thanh điều khiển ở dưới */
+:host([fullscreen]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #111;
+}
+
+:host([fullscreen]) .viewport {
+  width: min(100vw, calc((100vh - 48px) * 16 / 9));
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+}
+
+:host([fullscreen]) .controls {
+  width: min(100vw, calc((100vh - 48px) * 16 / 9));
+  margin: 8px auto 0;
+  color: #fff;
+}
+
+:host([fullscreen]) .counter {
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
+}

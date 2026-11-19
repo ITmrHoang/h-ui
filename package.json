@@ -752,6 +752,11 @@
       "import": "./dist/hui-slider.esm.js",
       "default": "./dist/hui-slider.esm.js"
     },
+    "./hui-slides": {
+      "types": "./dist/types/hui-slides.d.ts",
+      "import": "./dist/hui-slides.esm.js",
+      "default": "./dist/hui-slides.esm.js"
+    },
     "./hui-sortable": {
       "types": "./dist/types/hui-sortable.d.ts",
       "import": "./dist/hui-sortable.esm.js",

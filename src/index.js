@@ -240,4 +240,5 @@ export { default as HuiMarkdown, renderMarkdown } from './components/hui-markdow
 export { default as HuiFlashcard } from './components/hui-flashcard/index.js';
 export { default as HuiWhiteboard } from './components/hui-whiteboard/index.js';
 export { default as HuiPlot, parsePlot, evaluate as evaluateExpression } from './components/hui-plot/index.js';
+export { default as HuiSlides } from './components/hui-slides/index.js';
 export { default as HuiVirtualList } from './components/hui-virtual-list/index.js';
