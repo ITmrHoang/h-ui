@@ -1,5 +1,93 @@
 # @itmrhoang/h-ui
 
+## 0.6.0
+
+### Minor Changes
+
+- 8880254: Thêm `hui-flashcard` — thẻ ghi nhớ cho ôn tập lặp lại ngắt quãng (dùng trong Smart Learning Space):
+  
+  - Mặt trước / mặt sau là Markdown + công thức (hiển thị bằng `hui-markdown`); bấm hoặc Space / Enter để lật (hiệu ứng lật 3D, tắt khi người dùng chọn giảm chuyển động).
+  - Sau khi lật hiện 4 nút tự chấm Quên / Khó / Được / Dễ (phím 1–4), gợi ý lần ôn tới qua property `intervals`; `no-rating` để chỉ lật xem; `disabled` khi đang lưu.
+  - Sự kiện `hui-flip { flipped }`, `hui-rate { rating }`; method `flip(force?)`, `reset()`.
+  - Nằm trong nhóm CDN `learning`.
+- 2abf0d2: Thêm 2 component cho nội dung học tập (dùng trong Smart Learning Space):
+  
+  - `hui-math`: hiển thị công thức LaTeX bằng MathML gốc của trình duyệt, không cần thư viện ngoài. Phủ ký hiệu Toán THCS / THPT: phân số, căn (bậc n), mũ / chỉ số, chữ Hy Lạp, toán tử & quan hệ, hàm (`\sin`, `\log`…), `\lim` / `\sum` / `\int` có cận, `\left( \right)`, ma trận, hệ phương trình (`cases`), vector, `\widehat`, `\mathbb{R}`, `\text`. Lệnh chưa hỗ trợ hiện nguyên văn màu đỏ. Hàm thuần `latexToMathML(tex, { display })`.
+  - `hui-markdown`: Markdown rút gọn + công thức `$…$` / `$$…$$` + ảnh + bảng; xuống dòng đơn giữ nguyên; thuộc tính `inline` cho phương án trả lời. Dựng DOM bằng `createElement` + `textContent` (không `innerHTML`), link / ảnh chỉ nhận http(s), mailto, đường dẫn tương đối (ảnh thêm `data:image`). Hàm thuần `renderMarkdown(src, { inline, breaks })`.
+  - Nhóm CDN mới `learning` (`h-ui-learning.min.js`).
+- c336342: **BREAKING — API overlay thống nhất + quy ước đặt tên** (`.agents/rules/naming_rule.md`).
+  
+  Mọi overlay (modal, drawer, cart-drawer, command-palette, lightbox, cookie-consent, popover, dropdown, dropdown-button, popconfirm, hover-card, tooltip, tour, float-group, navbar, color-picker, date / range / time-picker, search-overlay) dùng chung:
+  
+  - property / attribute `open` là boolean thật (`el.open` đọc ra `true` / `false`), gán để mở / đóng;
+  - method `show()` / `hide()` / `toggle()` (bổ sung `toggle()` cho modal, lightbox, hover-card, popconfirm, color-picker, search-overlay, cookie-consent, tour; bổ sung cả bộ cho navbar, dropdown-button, date / range / time-picker);
+  - sự kiện `hui-open` → `hui-after-open`, `hui-close` → `hui-after-close` (bổ sung cho popover, dropdown, tooltip, hover-card, float-group, popconfirm, navbar, tour, cookie-consent; thêm `hui-after-open` / `hui-after-close` nơi còn thiếu). Phát mỗi lần trạng thái đổi (người dùng, method hay gán `open`), không phát cho trạng thái ban đầu lúc render.
+  
+  Chuyển đổi từ 0.5.1:
+  
+  | Cũ | Mới |
+  |----|-----|
+  | `modal.open()`, `palette.open()` | `show()` — method `open()` đã bỏ (trùng tên property) |
+  | `cookieConsent.open()` | `show()` |
+  | `close()` (modal, command-palette, lightbox, tour) | `hide()` — `close()` vẫn chạy (deprecated) |
+  | `isOpen` (modal, command-palette, cookie-consent) | `open` — `isOpen` vẫn đọc được (deprecated) |
+  | sự kiện `open-change` (popover, dropdown, tooltip, float-group, popconfirm, navbar, dropdown-button) | `hui-open` / `hui-close` — `open-change` vẫn phát (deprecated) |
+  | sự kiện `hui-open-change` (hover-card) | `hui-open` / `hui-close` — `hui-open-change` vẫn phát (deprecated) |
+  | tour: `hui-close` chỉ phát khi người dùng đóng | phát mọi lần đóng, `reason: 'close'` khi đóng bằng `hide()` / gán `open = false` |
+  | search-overlay: `hui-close` phát khi đã đóng xong | `hui-close` khi bắt đầu đóng, `hui-after-close` khi xong |
+  
+  Khác:
+  
+  - 4 sự kiện mở / đóng của overlay **không nổi bọt** (vẫn composed, giống `close` của `<dialog>`): tooltip / dropdown / date-picker nằm trong modal đóng thì `@hui-close` của modal không còn bị gọi nhầm. Nghe trực tiếp trên thẻ overlay (Vue `@hui-close` trên thẻ vẫn chạy); ai bắt `hui-open` / `hui-close` của modal / drawer ở phần tử cha (event delegation) cần chuyển listener về chính thẻ.
+  - `detail` của sự kiện luôn là object (`HuiElement.emit()` đổi `null` / bỏ trống thành `{}`).
+  - `HuiElement` gỡ cách bọc tạm "property trùng tên method"; thay bằng `console.warn` lúc define và test quét mọi component (`test/naming-conflicts.test.js`), cùng test hợp đồng overlay (`test/overlay-contract.test.js`).
+  - Sự kiện mở / đóng của hộp tùy chỉnh bên trong `hui-cookie-consent` không còn lọt ra ngoài (trùng tên với sự kiện của banner).
+- 3a3d6f2: Thêm `hui-plot` — đồ thị hàm số cho bài giảng / bài tập Toán:
+  
+  - Gõ công thức theo cách viết quen thuộc (nhân ngầm `2x`, dấu phẩy thập phân, `^ ² ³`, `√`, `|x|`, sin cos tan cot, ln, log…), mỗi dòng một đối tượng: hàm số, đường thẳng `x = c`, miền nghiệm `y > …` (tô màu), điểm `A(1; 2)`, tham số `a = 2` (tự sinh thanh trượt), khung trục `x: -2 .. 5`.
+  - Tự phân tích biểu thức, **không dùng eval**; vẽ Canvas 2D; kéo để di chuyển, cuộn / nút ± để phóng to, `locked` cho đồ thị tĩnh. Sự kiện `hui-view-change`, `hui-param-change`.
+  - `hui-markdown`: khối code ` ```plot ` hiện thành `<hui-plot>` (chưa import `hui-plot` thì vẫn thấy khối code).
+  - `hui-whiteboard`: công cụ **ƒ Đồ thị** (kéo khung → gõ công thức; chạm lại để sửa), method `addPlot(value, box?)`, thao tác mới `update { page, element }`.
+  - Nằm trong nhóm CDN `learning`.
+- 4459e29: Thêm `hui-slides` — trình chiếu bài giảng:
+  
+  - Mỗi phần tử con là một slide; khung 16:9 thiết kế ở 1280 × 720, tự co giãn theo chỗ đặt.
+  - Chuyển slide bằng nút, phím (← → Space PageUp PageDown Home End), vuốt; F toàn màn hình, G xem lưới (bấm một slide để mở).
+  - Property `index`, `noControls`, `readonly`, `overview`; method `next()`, `prev()`, `goTo(i)`, `toggleFullscreen()`, `toggleOverview()`; sự kiện `hui-slide-change { index, total }` — đồng bộ được giữa giáo viên và học sinh.
+  - Nằm trong nhóm CDN `learning`.
+- 29b870c: Thêm `hui-timetable` — lịch biểu tuần / ngày có khung giờ (dùng cho lịch dạy / lịch học của Smart Learning Space):
+  
+  - Sự kiện `[{ id, title, start, end, subtitle, color, status }]` đặt theo giờ; sự kiện chồng giờ tự chia cột; sự kiện qua nửa đêm cắt sang ngày sau; `status: 'cancelled'` gạch ngang.
+  - Khung giờ `start-hour` / `end-hour` tự nới để chứa mọi sự kiện; vạch giờ hiện tại; tự cuộn tới sự kiện đầu tiên / giờ hiện tại.
+  - Thanh điều hướng Trước / Hôm nay / Sau + đổi Tuần ↔ Ngày (bấm đầu cột để xem riêng ngày đó); `no-toolbar`, `no-view-switch`; ngày đầu tuần theo ngôn ngữ hoặc `week-start`.
+  - `selectable`: kéo chọn khung giờ trống (bước `slot-minutes`) → `hui-slot-select { start, end }`; bấm sự kiện → `hui-event-click`; đổi tuần / ngày → `hui-range-change { view, date, from, to }`.
+  - Method `prev()`, `next()`, `goToday()`, `scrollToTime(hour)`; getter `range`. Hàm thuần `normalizeEvents`, `daySegments`, `layoutColumns`.
+  - Nằm trong nhóm CDN `data`.
+- 0bfa0f9: Bảng dạy Toán (`hui-whiteboard`) + ô gõ công thức mới `hui-math-input`:
+  
+  - `hui-math-input`: ô gõ LaTeX có bàn phím ký hiệu Toán (phân số, căn, mũ, chỉ số, ngoặc, hệ phương trình, vectơ, π ≤ ≥ ≠ ∈ ℝ…, sin cos log lim ∑ ∫) và xem trước bằng MathML; bấm phím chèn mẫu tại con trỏ / bọc chữ đang chọn; `hui-submit` khi Ctrl + Enter; tham gia `<form>`.
+  - `hui-whiteboard`:
+    - Công cụ **chọn**: chạm / Shift / kéo khung, kéo để dời, kéo góc để đổi cỡ, Delete xóa, Ctrl + D nhân bản, bấm màu để đổi màu. Thao tác `update` nhận cả `elements` (nhiều phần tử).
+    - **Hình học**: điểm tự đặt tên (A, B, C…), đường tròn kéo từ tâm, đa giác; đoạn thẳng / đường tròn / đa giác bắt dính vào điểm có sẵn, Shift để thẳng góc 15°.
+    - **Công thức** (∑): gõ bằng `hui-math-input`, vẽ lên canvas bằng MathML (có trong ảnh xuất).
+    - **Nền trang**: ô vuông, ô ly, dòng kẻ, chấm, hệ trục Oxy — `setBackground()`, thao tác `page-bg`, ảnh chụp có `backgrounds`.
+    - **Ảnh**: `addImage(src, { width, height, locked })`, nút 🖼 phát `hui-image-request`, dán ảnh phát `hui-paste-image`; ảnh nền `locked` nằm dưới mọi nét, không chọn / tẩy được, "Xóa trang" giữ lại.
+    - `toDataURLAsync()` chờ ảnh / công thức tải xong.
+- 49eb66b: Thêm `hui-whiteboard` — bảng vẽ cho dạy trực tuyến (dùng trong phòng học của Smart Learning Space):
+  
+  - Bút, bút dạ quang, tẩy (xóa cả nét), đoạn thẳng, mũi tên, hình chữ nhật, elip, chữ; bảng màu + độ dày; hoàn tác / làm lại (Ctrl + Z / Ctrl + Y); nhiều trang; `readonly` để chỉ xem.
+  - Zero-dependency, vẽ bằng Canvas 2D, tọa độ chuẩn hóa theo trang 1600 × 900. Mỗi thay đổi phát `hui-change { op }` (`add` / `remove` / `clear` / `page-add`) để app đồng bộ; máy khác gọi `applyRemote(op)`. Sự kiện `hui-page { page }`.
+  - `getSnapshot()` / `loadSnapshot()` (gửi người vào sau, lưu lại), `toDataURL(page)` xuất ảnh, `elements(page)`.
+  - Nằm trong nhóm CDN `learning`.
+
+### Patch Changes
+
+- 0d3b7aa: Sửa lỗi khi dùng với Vue 3 (và framework gán property nói chung):
+  
+  - `hui-modal`, `hui-command-palette`: gán property `el.open = true / false` (Vue `:open`, React 19 `open={...}`) mở / đóng được — trước đây ghi đè mất method `open()` và không mở. Xem mục **BREAKING — API overlay** (changeset overlay-api-naming).
+  - `hui-input`: nhấn Enter gửi `<form>` chứa nó như `<input>` native (implicit submission): đi qua nút submit đầu tiên, nút đang `disabled` / `loading` thì không gửi, không có nút submit thì chỉ gửi khi form có 1 ô nhập; bỏ qua khi đang gõ IME, khi kèm phím bổ trợ, hoặc khi `keydown` bị `preventDefault()`.
+  - README (mục Vue): boolean nhiều từ viết camelCase (`:confirmLoading="x"`) — kebab-case `:confirm-loading="false"` thành attribute `"false"`, vẫn là `true` theo chuẩn HTML.
+
 ## 0.5.1
 
 ### Patch Changes
