@@ -502,6 +502,11 @@
       "import": "./dist/hui-math.esm.js",
       "default": "./dist/hui-math.esm.js"
     },
+    "./hui-math-input": {
+      "types": "./dist/types/hui-math-input.d.ts",
+      "import": "./dist/hui-math-input.esm.js",
+      "default": "./dist/hui-math-input.esm.js"
+    },
     "./hui-media-card": {
       "types": "./dist/types/hui-media-card.d.ts",
       "import": "./dist/hui-media-card.esm.js",

@@ -1,0 +1,112 @@
+/*
+ * HUI Math Input — biến override:
+ *   --hui-math-input-key-size  Cỡ chữ trên phím (15px)
+ * Parts: base, label, keyboard, key, field, preview
+ */
+
+:host {
+  display: block;
+  font-family: var(--hui-font-family);
+  color: var(--hui-text);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.base {
+  display: grid;
+  gap: var(--hui-space-xs, 6px);
+}
+
+.label {
+  font-size: var(--hui-font-sm);
+  font-weight: 500;
+}
+
+.keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 6px;
+  border: 1px solid var(--hui-border-secondary, var(--hui-border));
+  border-radius: var(--hui-radius-md);
+  background: var(--hui-bg-subtle, #f6f7f9);
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.group + .group {
+  padding-left: 10px;
+  border-left: 1px solid var(--hui-border-secondary, var(--hui-border));
+}
+
+.key {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--hui-border);
+  border-radius: var(--hui-radius-sm);
+  background: var(--hui-bg, #fff);
+  color: var(--hui-text);
+  font: inherit;
+  font-size: var(--hui-math-input-key-size, 15px);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.key:hover:not(:disabled) {
+  border-color: var(--hui-primary);
+  color: var(--hui-primary);
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--hui-primary);
+  outline-offset: 1px;
+}
+
+.key:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.field {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--hui-border);
+  border-radius: var(--hui-radius-md);
+  background: var(--hui-bg, #fff);
+  color: var(--hui-text);
+  font-family: var(--hui-font-mono, ui-monospace, SFMono-Regular, Consolas, monospace);
+  font-size: var(--hui-font-sm, 14px);
+  resize: vertical;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--hui-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hui-primary) 20%, transparent);
+}
+
+:host([invalid]) .field {
+  border-color: var(--hui-danger);
+}
+
+.preview {
+  min-height: 2em;
+  padding: 6px 10px;
+  border-radius: var(--hui-radius-md);
+  background: color-mix(in srgb, var(--hui-primary) 5%, transparent);
+  font-size: 1.15em;
+  overflow-x: auto;
+}
+
+.message {
+  font-size: var(--hui-font-xs, 12px);
+  color: var(--hui-danger);
+}

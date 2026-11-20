@@ -170,6 +170,50 @@ canvas {
   cursor: crosshair;
 }
 
+.stage[data-tool='select'] canvas {
+  cursor: default;
+}
+
+.stage[data-tool='math'] canvas {
+  cursor: text;
+}
+
+/* Ô gõ công thức (có bàn phím) */
+.math-box {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  width: min(380px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--hui-primary);
+  border-radius: var(--hui-radius-md);
+  background: var(--hui-bg-container, #fff);
+  box-shadow: var(--hui-shadow-md, 0 4px 12px rgb(0 0 0 / 12%));
+}
+
+.math-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.btn.primary {
+  border-color: var(--hui-primary);
+  background: var(--hui-primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: color-mix(in srgb, var(--hui-primary) 85%, #000);
+}
+
+.bg {
+  max-width: 120px;
+}
+
 @media (max-width: 480px) {
   .btn {
     min-width: 28px;
