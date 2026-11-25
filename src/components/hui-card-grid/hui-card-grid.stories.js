@@ -608,6 +608,10 @@ export const CustomizeFromOutside = {
     const grid = gridOf(canvasElement);
     await settle(grid);
     await expect(getComputedStyle(partOf(grid, 'grid')).columnGap).toBe('10px');
-    await expect(getComputedStyle(partOf(grid, 'footer')).justifyContent).toBe('flex-end');
+    // Kiểm tra vị trí thật thay vì chuỗi computed style (Chromium mới không còn trả 'flex-end')
+    const footer = partOf(grid, 'footer').getBoundingClientRect();
+    const more = partOf(grid, 'load-more').getBoundingClientRect();
+    await expect(more.width).toBeGreaterThan(0);
+    await expect(Math.abs(footer.right - more.right)).toBeLessThan(1);
   },
 };
